@@ -1,0 +1,37 @@
+# ---- .NET / Visual Studio / Service Fabric ----
+bin/
+obj/
+pkg/
+*.user
+*.suo
+.vs/
+*.psess
+*.vspx
+*.sln.docstates
+
+# Service Fabric local package output
+backend/TripPlannerApp/pkg/
+
+# Classic NuGet packages (packages.config) restored by Visual Studio
+backend/packages/
+
+# ---- Node / React (frontend) ----
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Environment files with local secrets/config
+.env
+.env.local
+.env.*.local
+
+# ---- Editor / OS ----
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# ---- Logs ----
+*.log
+npm-debug.log*

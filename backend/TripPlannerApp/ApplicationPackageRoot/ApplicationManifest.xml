@@ -1,0 +1,64 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ApplicationManifest xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ApplicationTypeName="TripPlannerAppType" ApplicationTypeVersion="1.0.0" xmlns="http://schemas.microsoft.com/2011/01/fabric">
+  <Parameters>
+    <Parameter Name="IdentityService_InstanceCount" DefaultValue="-1" />
+    <Parameter Name="IdentityService_ASPNETCORE_ENVIRONMENT" DefaultValue="Development" />
+    <Parameter Name="TripService_InstanceCount" DefaultValue="-1" />
+    <Parameter Name="TripService_ASPNETCORE_ENVIRONMENT" DefaultValue="Development" />
+    <Parameter Name="ExpenseService_InstanceCount" DefaultValue="-1" />
+    <Parameter Name="ExpenseService_ASPNETCORE_ENVIRONMENT" DefaultValue="Development" />
+    <Parameter Name="SharingService_MinReplicaSetSize" DefaultValue="1" />
+    <Parameter Name="SharingService_TargetReplicaSetSize" DefaultValue="1" />
+    <Parameter Name="SharingService_ASPNETCORE_ENVIRONMENT" DefaultValue="Development" />
+  </Parameters>
+  <ServiceManifestImport>
+    <ServiceManifestRef ServiceManifestName="IdentityServicePkg" ServiceManifestVersion="1.0.0" />
+    <ConfigOverrides />
+    <EnvironmentOverrides CodePackageRef="code">
+      <EnvironmentVariable Name="ASPNETCORE_ENVIRONMENT" Value="[IdentityService_ASPNETCORE_ENVIRONMENT]" />
+    </EnvironmentOverrides>
+  </ServiceManifestImport>
+  <ServiceManifestImport>
+    <ServiceManifestRef ServiceManifestName="TripServicePkg" ServiceManifestVersion="1.0.0" />
+    <ConfigOverrides />
+    <EnvironmentOverrides CodePackageRef="code">
+      <EnvironmentVariable Name="ASPNETCORE_ENVIRONMENT" Value="[TripService_ASPNETCORE_ENVIRONMENT]" />
+    </EnvironmentOverrides>
+  </ServiceManifestImport>
+  <ServiceManifestImport>
+    <ServiceManifestRef ServiceManifestName="ExpenseServicePkg" ServiceManifestVersion="1.0.0" />
+    <ConfigOverrides />
+    <EnvironmentOverrides CodePackageRef="code">
+      <EnvironmentVariable Name="ASPNETCORE_ENVIRONMENT" Value="[ExpenseService_ASPNETCORE_ENVIRONMENT]" />
+    </EnvironmentOverrides>
+  </ServiceManifestImport>
+  <ServiceManifestImport>
+    <ServiceManifestRef ServiceManifestName="SharingServicePkg" ServiceManifestVersion="1.0.0" />
+    <ConfigOverrides />
+    <EnvironmentOverrides CodePackageRef="code">
+      <EnvironmentVariable Name="ASPNETCORE_ENVIRONMENT" Value="[SharingService_ASPNETCORE_ENVIRONMENT]" />
+    </EnvironmentOverrides>
+  </ServiceManifestImport>
+  <DefaultServices>
+    <Service Name="IdentityService" ServicePackageActivationMode="ExclusiveProcess">
+      <StatelessService ServiceTypeName="IdentityServiceType" InstanceCount="[IdentityService_InstanceCount]">
+        <SingletonPartition />
+      </StatelessService>
+    </Service>
+    <Service Name="TripService" ServicePackageActivationMode="ExclusiveProcess">
+      <StatelessService ServiceTypeName="TripServiceType" InstanceCount="[TripService_InstanceCount]">
+        <SingletonPartition />
+      </StatelessService>
+    </Service>
+    <Service Name="ExpenseService" ServicePackageActivationMode="ExclusiveProcess">
+      <StatelessService ServiceTypeName="ExpenseServiceType" InstanceCount="[ExpenseService_InstanceCount]">
+        <SingletonPartition />
+      </StatelessService>
+    </Service>
+    <Service Name="SharingService" ServicePackageActivationMode="ExclusiveProcess">
+      <StatefulService ServiceTypeName="SharingServiceType" TargetReplicaSetSize="[SharingService_TargetReplicaSetSize]" MinReplicaSetSize="[SharingService_MinReplicaSetSize]">
+        <SingletonPartition />
+      </StatefulService>
+    </Service>
+  </DefaultServices>
+</ApplicationManifest>
