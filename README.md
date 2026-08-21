@@ -68,11 +68,11 @@ frontend/
 1. **Pokreni Visual Studio kao administrator** (desni klik → Run as administrator) — lokalni Service Fabric klaster (`FabricHostSvc`) zahteva admin prava da bi se pokrenuo
 2. Otvori `backend\TripPlanner.sln`
 3. Pri prvom otvaranju Visual Studio može da prikaže dijalog *"The project 'TripPlannerApp' has incompatible NuGet package installed..."* — klikni **Yes** (instalira `Microsoft.VisualStudio.Azure.Fabric.MSBuild`, neophodan za build)
-4. Kreiraj bazu za IdentityService (Package Manager Console, default project = `IdentityService`):
+4. Kreiraj baze (Package Manager Console, promeni "Default project" na servis pa pokreni):
    ```
    Update-Database
    ```
-   ili iz komandne linije, iz foldera `backend\IdentityService`:
+   ili iz komandne linije, iz foldera svakog servisa (`backend\IdentityService`, `backend\TripService`, ...):
    ```bash
    dotnet ef database update
    ```
@@ -138,3 +138,12 @@ Aplikacija je na `http://localhost:5173`. Početna stranica prikazuje status sva
 - `pages/LoginPage.tsx` i `RegisterPage.tsx` — forme sa validacijom (frontend + prikaz grešaka sa backend-a preko `utils/errors.ts`)
 - `HomePage` sada zaštićena (`ProtectedRoute`), prikazuje ime/ulogu ulogovanog korisnika i dugme za odjavu
 - **Testirano uživo u browseru** (frontend + realan backend na lokalnom klasteru): registracija kroz formu → auto-login → dashboard prikazuje ime i ulogu ("User") → refresh stranice zadržava sesiju (poziv `/users/me`) → odjava briše token i vraća na `/login` → pogrešna lozinka na login formi ispravno prikazuje "Pogrešan email ili lozinka."
+
+### Deo 5 — TripService: CRUD za planove putovanja
+- `Models/TripPlan.cs` (Id, UserId, Name, Description, StartDate, EndDate, Budget, Notes, CreatedAt, UpdatedAt) — odvojeno od `Dtos/TripPlanDto.cs` (odgovor) i `Dtos/TripPlanRequestDto.cs` (create/update zahtev), mapiranje preko AutoMapper-a
+- `TripPlanRequestDto` implementira `IValidatableObject` za validaciju koja zavisi od dva polja — krajnji datum ne može biti prije početnog (400 sa jasnom porukom); `[Range(0, ...)]` sprečava negativan budžet
+- `Services/TripPlanService.cs` — sve operacije filtriraju po `UserId` iz JWT-a (`FindOwnedTripAsync`), tako da korisnik može da vidi/menja/briše samo svoje planove; tuđ plan vraća 404 (ne otkriva da postoji)
+- `TripPlansController` — puni REST CRUD na `/api/trips` (`GET`, `GET/{id}`, `POST`, `PUT/{id}`, `DELETE/{id}`), zaštićen `[Authorize]` (isti JWT ključ kao IdentityService — servisi nezavisno validiraju token, bez međusobnog pozivanja)
+- Ista JWT/EF Core/AutoMapper konfiguracija kao u IdentityService (`Startup.cs`, `appsettings.json`, `TripDbContextFactory` za `dotnet ef`)
+- **Bag pronađen i ispravljen tokom testiranja**: `TripService.cs` (Service Fabric klasa) nije učitavala `appsettings.json` u konfiguraciju (kopirao sam Startup.cs ali zaboravio `ConfigureAppConfiguration` poziv) — servis je pucao sa `NullReferenceException` na JWT ključu. Ispravljeno dodavanjem istog `ConfigureAppConfiguration` bloka kao u `IdentityService.cs`.
+- **Testirano uživo end-to-end** kroz redeploy: bez tokena → 401; kreiranje sa krajnjim datumom pre početnog → 400; negativan budžet → 400; pun CRUD ciklus (create → 201, list → 200, get by id → 200, update → 200, delete → 204, get posle brisanja → 404); i **izolacija po korisniku** — drugi korisnik ne može da vidi ni pristupi tuđem planu (404, prazna lista)
