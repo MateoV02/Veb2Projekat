@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { ServiceStatusCard } from "../components/health/ServiceStatusCard";
 import { checkIdentityHealth } from "../services/identityService";
 import { checkTripHealth } from "../services/tripService";
@@ -16,7 +17,7 @@ const SERVICE_LABELS: Record<ServiceKey, string> = {
 };
 
 export function HomePage() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const [status, setStatus] = useState<Record<ServiceKey, boolean | null>>({
     identity: null,
     trip: null,
@@ -50,16 +51,13 @@ export function HomePage() {
   }, []);
 
   return (
-    <div style={{ padding: "2rem", fontFamily: "sans-serif" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <h1>Trip Planner</h1>
-        <div>
-          <span style={{ marginRight: "1rem" }}>
-            Dobrodošao/la, <strong>{user?.name}</strong> ({user?.role})
-          </span>
-          <button onClick={logout}>Odjavi se</button>
-        </div>
-      </div>
+    <div>
+      <h1>Dobrodošao/la, {user?.name}</h1>
+
+      <p>
+        <Link to="/trips">Pogledaj svoje planove putovanja →</Link>
+      </p>
+
       <p>Status backend mikroservisa (Service Fabric):</p>
       <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
         {(Object.keys(SERVICE_LABELS) as ServiceKey[]).map((key) => (
