@@ -62,13 +62,23 @@ frontend/
 - Visual Studio 2022 sa Service Fabric SDK i runtime-om (`C:\Program Files\Microsoft SDKs\Service Fabric` mora postojati)
 - Node.js 18+
 - SQL Server LocalDB
+- `dotnet-ef` alat (`dotnet tool install --global dotnet-ef`) — ako migracije radiš iz komandne linije umesto Package Manager Console-e
 
 ### Backend
-1. Otvori `backend\TripPlanner.sln` u Visual Studio-u
-2. Pri prvom otvaranju Visual Studio može da prikaže dijalog *"The project 'TripPlannerApp' has incompatible NuGet package installed..."* — klikni **Yes** (instalira `Microsoft.VisualStudio.Azure.Fabric.MSBuild`, neophodan za build)
-3. Postavi `TripPlannerApp` kao startup projekat
-4. Ctrl+F5 (ili F5) — Visual Studio će podesiti/pokrenuti lokalni Service Fabric klaster i deploy-ovati aplikaciju
-5. Provera: `http://localhost:8081/api/identity/health` treba da vrati `{"status":"ok","service":"IdentityService"}` (isto za 8082/trips, 8083/expenses, 8084/sharing)
+1. **Pokreni Visual Studio kao administrator** (desni klik → Run as administrator) — lokalni Service Fabric klaster (`FabricHostSvc`) zahteva admin prava da bi se pokrenuo
+2. Otvori `backend\TripPlanner.sln`
+3. Pri prvom otvaranju Visual Studio može da prikaže dijalog *"The project 'TripPlannerApp' has incompatible NuGet package installed..."* — klikni **Yes** (instalira `Microsoft.VisualStudio.Azure.Fabric.MSBuild`, neophodan za build)
+4. Kreiraj bazu za IdentityService (Package Manager Console, default project = `IdentityService`):
+   ```
+   Update-Database
+   ```
+   ili iz komandne linije, iz foldera `backend\IdentityService`:
+   ```bash
+   dotnet ef database update
+   ```
+5. Postavi `TripPlannerApp` kao startup projekat
+6. Ctrl+F5 (ili dugme Start) — Visual Studio će podesiti/pokrenuti lokalni Service Fabric klaster i deploy-ovati aplikaciju (prvi put može da potraje par minuta)
+7. Provera: `http://localhost:8081/api/identity/health` treba da vrati `{"status":"ok","service":"IdentityService"}` (isto za 8082/trips, 8083/expenses, 8084/sharing)
 
 ### Frontend
 ```bash
@@ -90,3 +100,13 @@ Aplikacija je na `http://localhost:5173`. Početna stranica prikazuje status sva
 - React + TypeScript frontend inicijalizovan preko Vite-a; podešen sloj `api/` (axios instance-i po servisu) i `services/` (funkcije koje komponente pozivaju — HTTP pozivi nikad direktno u komponentama)
 - Početna stranica (`HomePage`) proverava dostupnost sva 4 backend servisa i prikazuje status — testirano uživo u browseru (svi servisi ispravno prikazuju "nedostupan" jer backend još nije pokrenut lokalno)
 - `.env.example` sa URL-ovima sva 4 servisa
+- Dodat `Deploy.0` unos u `.sln` za `TripPlannerApp` (bez njega F5/Start u Visual Studio-u ne deploy-uje aplikaciju na klaster, samo je builda)
+- Potvrđen pun end-to-end tok na lokalnom klasteru: Visual Studio pokrenut kao administrator (`FabricHostSvc` zahteva admin prava) → deploy uspešan → sva 4 `/health` endpointa vraćaju ispravan odgovor
+
+### Deo 2 — Baza i migracije za IdentityService
+- Dodati EF Core paketi (`Microsoft.EntityFrameworkCore.SqlServer`, `.Design`) i `AutoMapper` u `IdentityService.csproj`
+- `Models/User.cs` (DB entitet) i `Models/UserRole.cs` (enum: User/Admin) — odvojeno od `Dtos/UserDto.cs` (DTO nikad ne izlaže `PasswordHash`), mapiranje kroz `Mapping/MappingProfile.cs` (AutoMapper)
+- `Data/IdentityDbContext.cs` — konfiguracija: email je jedinstven (`HasIndex().IsUnique()`), max dužine polja, rola se čuva kao string
+- `Data/IdentityDbContextFactory.cs` — `IDesignTimeDbContextFactory`, potreban da `dotnet ef` može da napravi migraciju bez pokretanja Service Fabric runtime-a (`Program.Main` zahteva pravi Fabric kontekst koji `dotnet ef` alat nema)
+- `appsettings.json` sa connection string-om ka `IdentityDb` (LocalDB); servis ga učitava kroz `ConfigureAppConfiguration` u `IdentityService.cs`
+- Kreirana početna migracija (`Migrations/InitialCreate`) i **testirana uživo** — `dotnet ef database update` je stvarno napravio `IdentityDb` bazu i `Users` tabelu na LocalDB (potvrđeno preko `sqlcmd`)

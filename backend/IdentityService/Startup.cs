@@ -1,5 +1,8 @@
+using IdentityService.Data;
+using IdentityService.Mapping;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -28,6 +31,11 @@ namespace IdentityService
             });
 
             services.AddControllers();
+
+            services.AddDbContext<IdentityDbContext>(options =>
+                options.UseSqlServer(Configuration.GetConnectionString("IdentityDb")));
+
+            services.AddAutoMapper(cfg => { }, typeof(MappingProfile));
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
