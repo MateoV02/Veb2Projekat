@@ -8,6 +8,7 @@ import { RegisterPage } from "./pages/RegisterPage";
 import { TripsListPage } from "./pages/TripsListPage";
 import { TripFormPage } from "./pages/TripFormPage";
 import { TripDetailPage } from "./pages/TripDetailPage";
+import { DestinationFormPage } from "./pages/DestinationFormPage";
 
 function App() {
   return (
@@ -29,6 +30,8 @@ function App() {
             <Route path="/trips/new" element={<TripFormPage />} />
             <Route path="/trips/:id" element={<TripDetailPage />} />
             <Route path="/trips/:id/edit" element={<TripFormPage />} />
+            <Route path="/trips/:tripId/destinations/new" element={<DestinationFormPage />} />
+            <Route path="/trips/:tripId/destinations/:destinationId/edit" element={<DestinationFormPage />} />
           </Route>
         </Routes>
       </AuthProvider>

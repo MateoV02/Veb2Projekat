@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { deleteTrip, getTripById } from "../services/tripService";
+import { deleteDestination, getDestinations } from "../services/destinationService";
 import type { TripPlan } from "../models/Trip";
+import type { Destination } from "../models/Destination";
+import { DestinationCard } from "../components/trips/DestinationCard";
 import { getErrorMessage } from "../utils/errors";
 import { formatDate, formatMoney } from "../utils/format";
 
@@ -10,6 +13,7 @@ export function TripDetailPage() {
   const navigate = useNavigate();
 
   const [trip, setTrip] = useState<TripPlan | null>(null);
+  const [destinations, setDestinations] = useState<Destination[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -18,13 +22,16 @@ export function TripDetailPage() {
       return;
     }
 
-    getTripById(id)
-      .then(setTrip)
+    Promise.all([getTripById(id), getDestinations(id)])
+      .then(([tripResult, destinationsResult]) => {
+        setTrip(tripResult);
+        setDestinations(destinationsResult);
+      })
       .catch((err) => setError(getErrorMessage(err, "Plan putovanja nije pronađen.")))
       .finally(() => setIsLoading(false));
   }, [id]);
 
-  async function handleDelete() {
+  async function handleDeleteTrip() {
     if (!id || !confirm("Da li sigurno želiš da obrišeš ovaj plan putovanja?")) {
       return;
     }
@@ -34,6 +41,19 @@ export function TripDetailPage() {
       navigate("/trips");
     } catch (err) {
       setError(getErrorMessage(err, "Greška prilikom brisanja plana."));
+    }
+  }
+
+  async function handleDeleteDestination(destinationId: string) {
+    if (!id || !confirm("Da li sigurno želiš da obrišeš ovu destinaciju?")) {
+      return;
+    }
+
+    try {
+      await deleteDestination(id, destinationId);
+      setDestinations((prev) => prev.filter((d) => d.id !== destinationId));
+    } catch (err) {
+      setError(getErrorMessage(err, "Greška prilikom brisanja destinacije."));
     }
   }
 
@@ -60,7 +80,7 @@ export function TripDetailPage() {
           <Link to={`/trips/${trip.id}/edit`}>
             <button>Izmeni</button>
           </Link>
-          <button onClick={handleDelete}>Obriši</button>
+          <button onClick={handleDeleteTrip}>Obriši</button>
         </div>
       </div>
 
@@ -88,6 +108,28 @@ export function TripDetailPage() {
           </>
         )}
       </dl>
+
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "2rem" }}>
+        <h2 style={{ margin: 0 }}>Destinacije</h2>
+        <Link to={`/trips/${trip.id}/destinations/new`}>
+          <button>+ Nova destinacija</button>
+        </Link>
+      </div>
+
+      {destinations.length === 0 ? (
+        <p>Nema još nijedne destinacije za ovo putovanje.</p>
+      ) : (
+        <div style={{ marginTop: "1rem" }}>
+          {destinations.map((destination) => (
+            <DestinationCard
+              key={destination.id}
+              tripId={trip.id}
+              destination={destination}
+              onDelete={handleDeleteDestination}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
