@@ -128,3 +128,13 @@ Aplikacija je na `http://localhost:5173`. Početna stranica prikazuje status sva
 - JWT Bearer autentikacija podešena u `Startup.cs` (`ValidateIssuer`, `ValidateAudience`, `ValidateLifetime`, `ValidateIssuerSigningKey` — svi uključeni)
 - **Otkriven i rešen važan environment problem**: Service Fabric pokreće servise pod nalogom `NT AUTHORITY\NETWORK SERVICE`, koji nema pristup LocalDB instanci vezanoj za razvojni Windows nalog. Rešenje (dokumentovano u README → Pokretanje → Backend, korak 5, i `backend/setup-localdb-access.sql`): deljenje LocalDB instance (`sqllocaldb share`) + SQL login za `NETWORK SERVICE`. Ovo je jednokratan korak potreban svakom ko pokreće projekat.
 - **Testirano uživo end-to-end** preko redeploy-a na lokalni klaster: register (201) → duplikat email (409) → pogrešna lozinka (401) → login (200, ispravan JWT) → `/users/me` bez tokena (401) → sa tokenom (200) → `/users` kao obična uloga (403) → isti korisnik promovisan u Admin-a u bazi → `/users` sada vraća listu (200)
+- Sitna popravka: `UserRole` enum se po difoltu serijalizovao kao broj (`0`/`1`) u JSON-u — dodat `JsonStringEnumConverter` u `Startup.cs` da API vraća čitljivo `"User"`/`"Admin"`
+
+### Deo 4 — Frontend autentikacija
+- `models/Auth.ts` — TypeScript tipovi koji odgovaraju backend DTO-ima (`User`, `AuthResponse`, `RegisterRequest`, `LoginRequest`)
+- `services/identityService.ts` proširen sa `register`, `login`, `getCurrentUser` (HTTP pozivi i dalje isključivo u servisnom sloju)
+- `context/AuthContext.tsx` — Context API (`AuthProvider`/`useAuth`), token se čuva u `localStorage`; pri pokretanju aplikacije poziva `/users/me` da obnovi sesiju i proveri da token još važi (ako ne, briše ga)
+- `components/routing/ProtectedRoute.tsx` — preusmerava na `/login` ako korisnik nije ulogovan
+- `pages/LoginPage.tsx` i `RegisterPage.tsx` — forme sa validacijom (frontend + prikaz grešaka sa backend-a preko `utils/errors.ts`)
+- `HomePage` sada zaštićena (`ProtectedRoute`), prikazuje ime/ulogu ulogovanog korisnika i dugme za odjavu
+- **Testirano uživo u browseru** (frontend + realan backend na lokalnom klasteru): registracija kroz formu → auto-login → dashboard prikazuje ime i ulogu ("User") → refresh stranice zadržava sesiju (poziv `/users/me`) → odjava briše token i vraća na `/login` → pogrešna lozinka na login formi ispravno prikazuje "Pogrešan email ili lozinka."

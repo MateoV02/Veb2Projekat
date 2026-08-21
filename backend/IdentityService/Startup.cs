@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json.Serialization;
 using IdentityService.Data;
 using IdentityService.Mapping;
 using IdentityService.Services;
@@ -34,7 +35,11 @@ namespace IdentityService
                 });
             });
 
-            services.AddControllers();
+            services.AddControllers()
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                });
 
             services.AddDbContext<IdentityDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("IdentityDb")));
