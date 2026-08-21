@@ -76,9 +76,18 @@ frontend/
    ```bash
    dotnet ef database update
    ```
-5. Postavi `TripPlannerApp` kao startup projekat
-6. Ctrl+F5 (ili dugme Start) — Visual Studio će podesiti/pokrenuti lokalni Service Fabric klaster i deploy-ovati aplikaciju (prvi put može da potraje par minuta)
-7. Provera: `http://localhost:8081/api/identity/health` treba da vrati `{"status":"ok","service":"IdentityService"}` (isto za 8082/trips, 8083/expenses, 8084/sharing)
+5. **Podeli LocalDB instancu i dodaj pristup** (jednokratno, obavezno — inače servisi ne mogu da se povežu na bazu jer Service Fabric pokreće servise pod nalogom `NT AUTHORITY\NETWORK SERVICE`, koji nema pristup tvojoj LocalDB instanci po difoltu):
+   - U **administratorskom** PowerShell-u/cmd-u:
+     ```powershell
+     sqllocaldb share MSSQLLocalDB TripPlannerShared
+     ```
+   - Zatim (ne mora admin):
+     ```bash
+     sqlcmd -S "(localdb)\.\TripPlannerShared" -i backend\setup-localdb-access.sql
+     ```
+6. Postavi `TripPlannerApp` kao startup projekat
+7. Ctrl+F5 (ili dugme Start) — Visual Studio će podesiti/pokrenuti lokalni Service Fabric klaster i deploy-ovati aplikaciju (prvi put može da potraje par minuta)
+8. Provera: `http://localhost:8081/api/identity/health` treba da vrati `{"status":"ok","service":"IdentityService"}` (isto za 8082/trips, 8083/expenses, 8084/sharing)
 
 ### Frontend
 ```bash
@@ -110,3 +119,12 @@ Aplikacija je na `http://localhost:5173`. Početna stranica prikazuje status sva
 - `Data/IdentityDbContextFactory.cs` — `IDesignTimeDbContextFactory`, potreban da `dotnet ef` može da napravi migraciju bez pokretanja Service Fabric runtime-a (`Program.Main` zahteva pravi Fabric kontekst koji `dotnet ef` alat nema)
 - `appsettings.json` sa connection string-om ka `IdentityDb` (LocalDB); servis ga učitava kroz `ConfigureAppConfiguration` u `IdentityService.cs`
 - Kreirana početna migracija (`Migrations/InitialCreate`) i **testirana uživo** — `dotnet ef database update` je stvarno napravio `IdentityDb` bazu i `Users` tabelu na LocalDB (potvrđeno preko `sqlcmd`)
+
+### Deo 3 — Registracija, login, JWT i autorizacija
+- `Dtos/RegisterRequestDto.cs`, `LoginRequestDto.cs`, `AuthResponseDto.cs` — validacija preko data annotations (`[Required]`, `[EmailAddress]`, `[MinLength(6)]` za lozinku)
+- `Services/JwtTokenService.cs` — generiše JWT (claims: sub, email, name, role), potpisan HMAC SHA256 ključem iz `appsettings.json` (`Jwt` sekcija: Key/Issuer/Audience/ExpiryMinutes — isti ključ će koristiti i ostali servisi da validiraju token bez pozivanja IdentityService-a)
+- `Services/UserService.cs` — registracija (BCrypt heširanje lozinke, provera duplikata email-a → `EmailAlreadyExistsException` → 409) i login (BCrypt.Verify, generički "pogrešan email ili lozinka" odgovor da se ne otkriva da li email postoji → 401)
+- `AuthController` (`POST /api/identity/auth/register`, `POST /api/identity/auth/login`) i `UsersController` (`GET /api/identity/users/me` — bilo koji ulogovan korisnik, `GET /api/identity/users` — `[Authorize(Roles = "Admin")]`) — demonstrira role-based autorizaciju
+- JWT Bearer autentikacija podešena u `Startup.cs` (`ValidateIssuer`, `ValidateAudience`, `ValidateLifetime`, `ValidateIssuerSigningKey` — svi uključeni)
+- **Otkriven i rešen važan environment problem**: Service Fabric pokreće servise pod nalogom `NT AUTHORITY\NETWORK SERVICE`, koji nema pristup LocalDB instanci vezanoj za razvojni Windows nalog. Rešenje (dokumentovano u README → Pokretanje → Backend, korak 5, i `backend/setup-localdb-access.sql`): deljenje LocalDB instance (`sqllocaldb share`) + SQL login za `NETWORK SERVICE`. Ovo je jednokratan korak potreban svakom ko pokreće projekat.
+- **Testirano uživo end-to-end** preko redeploy-a na lokalni klaster: register (201) → duplikat email (409) → pogrešna lozinka (401) → login (200, ispravan JWT) → `/users/me` bez tokena (401) → sa tokenom (200) → `/users` kao obična uloga (403) → isti korisnik promovisan u Admin-a u bazi → `/users` sada vraća listu (200)
