@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -34,7 +35,11 @@ namespace TripService
                 });
             });
 
-            services.AddControllers();
+            services.AddControllers()
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                });
 
             services.AddDbContext<TripDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("TripDb")));
@@ -43,6 +48,7 @@ namespace TripService
 
             services.AddScoped<ITripPlanService, TripPlanService>();
             services.AddScoped<IDestinationService, DestinationService>();
+            services.AddScoped<IActivityService, ActivityService>();
 
             var jwtSection = Configuration.GetSection("Jwt");
 

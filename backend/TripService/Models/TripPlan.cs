@@ -26,5 +26,7 @@ namespace TripService.Models
         public DateTime UpdatedAt { get; set; }
 
         public ICollection<Destination> Destinations { get; set; } = new List<Destination>();
+
+        public ICollection<Activity> Activities { get; set; } = new List<Activity>();
     }
 }

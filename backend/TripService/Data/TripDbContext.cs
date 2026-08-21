@@ -14,6 +14,8 @@ namespace TripService.Data
 
         public DbSet<Destination> Destinations { get; set; }
 
+        public DbSet<Activity> Activities { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<TripPlan>(entity =>
@@ -51,6 +53,36 @@ namespace TripService.Data
                     .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasIndex(d => d.TripPlanId);
+            });
+
+            modelBuilder.Entity<Activity>(entity =>
+            {
+                entity.HasKey(a => a.Id);
+
+                entity.Property(a => a.Name)
+                    .IsRequired()
+                    .HasMaxLength(150);
+
+                entity.Property(a => a.Location)
+                    .HasMaxLength(200);
+
+                entity.Property(a => a.Description)
+                    .HasMaxLength(1000);
+
+                entity.Property(a => a.EstimatedCost)
+                    .HasColumnType("decimal(18,2)");
+
+                entity.Property(a => a.Status)
+                    .HasConversion<string>()
+                    .HasMaxLength(20)
+                    .IsRequired();
+
+                entity.HasOne(a => a.TripPlan)
+                    .WithMany(t => t.Activities)
+                    .HasForeignKey(a => a.TripPlanId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasIndex(a => a.TripPlanId);
             });
         }
     }
