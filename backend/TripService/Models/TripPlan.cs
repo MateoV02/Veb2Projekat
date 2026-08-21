@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace TripService.Models
 {
@@ -23,5 +24,7 @@ namespace TripService.Models
         public DateTime CreatedAt { get; set; }
 
         public DateTime UpdatedAt { get; set; }
+
+        public ICollection<Destination> Destinations { get; set; } = new List<Destination>();
     }
 }

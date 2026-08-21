@@ -9,6 +9,7 @@ namespace TripService.Mapping
         public MappingProfile()
         {
             CreateMap<TripPlan, TripPlanDto>();
+            CreateMap<Destination, DestinationDto>();
         }
     }
 }

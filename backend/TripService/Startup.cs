@@ -42,6 +42,7 @@ namespace TripService
             services.AddAutoMapper(cfg => { }, typeof(MappingProfile));
 
             services.AddScoped<ITripPlanService, TripPlanService>();
+            services.AddScoped<IDestinationService, DestinationService>();
 
             var jwtSection = Configuration.GetSection("Jwt");
 

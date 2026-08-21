@@ -12,6 +12,8 @@ namespace TripService.Data
 
         public DbSet<TripPlan> TripPlans { get; set; }
 
+        public DbSet<Destination> Destinations { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<TripPlan>(entity =>
@@ -29,6 +31,26 @@ namespace TripService.Data
                     .HasColumnType("decimal(18,2)");
 
                 entity.HasIndex(t => t.UserId);
+            });
+
+            modelBuilder.Entity<Destination>(entity =>
+            {
+                entity.HasKey(d => d.Id);
+
+                entity.Property(d => d.Name)
+                    .IsRequired()
+                    .HasMaxLength(150);
+
+                entity.Property(d => d.Location)
+                    .IsRequired()
+                    .HasMaxLength(200);
+
+                entity.HasOne(d => d.TripPlan)
+                    .WithMany(t => t.Destinations)
+                    .HasForeignKey(d => d.TripPlanId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasIndex(d => d.TripPlanId);
             });
         }
     }
