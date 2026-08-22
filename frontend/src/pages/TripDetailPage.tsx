@@ -77,6 +77,9 @@ export function TripDetailPage() {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start", marginTop: "1rem" }}>
         <h1 style={{ margin: 0 }}>{trip.name}</h1>
         <div style={{ display: "flex", gap: "0.5rem" }}>
+          <Link to={`/trips/${trip.id}/activities`}>
+            <button>Aktivnosti / kalendar</button>
+          </Link>
           <Link to={`/trips/${trip.id}/edit`}>
             <button>Izmeni</button>
           </Link>

@@ -12,3 +12,7 @@ export function formatMoney(value: number): string {
 export function toDateInputValue(value: string): string {
   return value.slice(0, 10);
 }
+
+export function toDateTimeInputValue(value: string): string {
+  return value.slice(0, 16);
+}
