@@ -51,23 +51,32 @@ export function HomePage() {
   }, []);
 
   return (
-    <div>
-      <h1>Dobrodošao/la, {user?.name}</h1>
+    <div className="page">
+      <div className="page-header">
+        <div>
+          <h1>Dobrodošao/la, {user?.name} 👋</h1>
+          <p style={{ margin: 0 }}>Evo pregleda tvog naloga i statusa sistema.</p>
+        </div>
+        <Link to="/trips" className="btn btn-primary">
+          Moji planovi putovanja →
+        </Link>
+      </div>
 
-      <p>
-        <Link to="/trips">Pogledaj svoje planove putovanja →</Link>
-      </p>
-
-      <p>Status backend mikroservisa (Service Fabric):</p>
-      <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
-        {(Object.keys(SERVICE_LABELS) as ServiceKey[]).map((key) => (
-          <ServiceStatusCard
-            key={key}
-            name={SERVICE_LABELS[key]}
-            loading={loading}
-            online={status[key]}
-          />
-        ))}
+      <div className="section">
+        <div className="section-header">
+          <h2>Status backend servisa</h2>
+          <span className="muted-count">Service Fabric klaster</span>
+        </div>
+        <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
+          {(Object.keys(SERVICE_LABELS) as ServiceKey[]).map((key) => (
+            <ServiceStatusCard
+              key={key}
+              name={SERVICE_LABELS[key]}
+              loading={loading}
+              online={status[key]}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );

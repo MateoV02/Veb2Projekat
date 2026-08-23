@@ -1,11 +1,16 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { TripCard } from "../components/trips/TripCard";
+import { EmptyState } from "../components/ui/EmptyState";
+import { ListSkeleton } from "../components/ui/Skeleton";
+import { ErrorAlert } from "../components/ui/Alert";
 import { deleteTrip, getTrips } from "../services/tripService";
 import type { TripPlan } from "../models/Trip";
 import { getErrorMessage } from "../utils/errors";
+import { useToast } from "../context/ToastContext";
 
 export function TripsListPage() {
+  const { showToast } = useToast();
   const [trips, setTrips] = useState<TripPlan[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -30,28 +35,37 @@ export function TripsListPage() {
     try {
       await deleteTrip(id);
       setTrips((prev) => prev.filter((trip) => trip.id !== id));
+      showToast("Plan putovanja je obrisan.", "success");
     } catch (err) {
-      setError(getErrorMessage(err, "Greška prilikom brisanja plana."));
+      showToast(getErrorMessage(err, "Greška prilikom brisanja plana."), "error");
     }
   }
 
   return (
-    <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+    <div className="page">
+      <div className="page-header">
         <h1>Moji planovi putovanja</h1>
-        <Link to="/trips/new">
-          <button>+ Novi plan</button>
+        <Link to="/trips/new" className="btn btn-primary">
+          + Novi plan
         </Link>
       </div>
 
-      {error && <p style={{ color: "#c62828" }}>{error}</p>}
+      {error && <ErrorAlert message={error} />}
 
       {isLoading ? (
-        <p>Učitavanje...</p>
+        <ListSkeleton count={3} />
       ) : trips.length === 0 ? (
-        <p>Nemaš još nijedan plan putovanja. Klikni "+ Novi plan" da kreiraš prvi.</p>
+        <EmptyState
+          title="Nemaš još nijedan plan putovanja"
+          description='Klikni na dugme "+ Novi plan" da kreiraš svoj prvi plan putovanja.'
+          action={
+            <Link to="/trips/new" className="btn btn-primary">
+              + Novi plan
+            </Link>
+          }
+        />
       ) : (
-        <div>
+        <div className="fade-in">
           {trips.map((trip) => (
             <TripCard key={trip.id} trip={trip} onDelete={handleDelete} />
           ))}

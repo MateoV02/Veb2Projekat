@@ -14,12 +14,17 @@ import type { ChecklistItem } from "../models/Checklist";
 import { DestinationCard } from "../components/trips/DestinationCard";
 import { ChecklistSection } from "../components/trips/ChecklistSection";
 import { SharePanel } from "../components/trips/SharePanel";
+import { EmptyState } from "../components/ui/EmptyState";
+import { ErrorAlert } from "../components/ui/Alert";
+import { LoadingRow } from "../components/ui/Spinner";
 import { getErrorMessage } from "../utils/errors";
 import { formatDate, formatMoney } from "../utils/format";
+import { useToast } from "../context/ToastContext";
 
 export function TripDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   const [trip, setTrip] = useState<TripPlan | null>(null);
   const [destinations, setDestinations] = useState<Destination[]>([]);
@@ -51,7 +56,7 @@ export function TripDetailPage() {
       const created = await createChecklistItem(id, { text, isCompleted: false });
       setChecklistItems((prev) => [...prev, created]);
     } catch (err) {
-      setError(getErrorMessage(err, "Greška prilikom dodavanja stavke."));
+      showToast(getErrorMessage(err, "Greška prilikom dodavanja stavke."), "error");
     }
   }
 
@@ -67,7 +72,7 @@ export function TripDetailPage() {
       });
       setChecklistItems((prev) => prev.map((i) => (i.id === updated.id ? updated : i)));
     } catch (err) {
-      setError(getErrorMessage(err, "Greška prilikom izmene stavke."));
+      showToast(getErrorMessage(err, "Greška prilikom izmene stavke."), "error");
     }
   }
 
@@ -80,7 +85,7 @@ export function TripDetailPage() {
       await deleteChecklistItem(id, itemId);
       setChecklistItems((prev) => prev.filter((i) => i.id !== itemId));
     } catch (err) {
-      setError(getErrorMessage(err, "Greška prilikom brisanja stavke."));
+      showToast(getErrorMessage(err, "Greška prilikom brisanja stavke."), "error");
     }
   }
 
@@ -91,9 +96,10 @@ export function TripDetailPage() {
 
     try {
       await deleteTrip(id);
+      showToast("Plan putovanja je obrisan.", "success");
       navigate("/trips");
     } catch (err) {
-      setError(getErrorMessage(err, "Greška prilikom brisanja plana."));
+      showToast(getErrorMessage(err, "Greška prilikom brisanja plana."), "error");
     }
   }
 
@@ -105,92 +111,107 @@ export function TripDetailPage() {
     try {
       await deleteDestination(id, destinationId);
       setDestinations((prev) => prev.filter((d) => d.id !== destinationId));
+      showToast("Destinacija je obrisana.", "success");
     } catch (err) {
-      setError(getErrorMessage(err, "Greška prilikom brisanja destinacije."));
+      showToast(getErrorMessage(err, "Greška prilikom brisanja destinacije."), "error");
     }
   }
 
   if (isLoading) {
-    return <p>Učitavanje...</p>;
+    return (
+      <div className="page">
+        <LoadingRow />
+      </div>
+    );
   }
 
   if (error || !trip) {
     return (
-      <div>
-        <p style={{ color: "#c62828" }}>{error ?? "Plan putovanja nije pronađen."}</p>
+      <div className="page">
+        <ErrorAlert message={error ?? "Plan putovanja nije pronađen."} />
         <Link to="/trips">← Nazad na listu</Link>
       </div>
     );
   }
 
   return (
-    <div style={{ maxWidth: 600 }}>
+    <div className="page fade-in">
       <Link to="/trips">← Nazad na listu</Link>
 
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start", marginTop: "1rem" }}>
+      <div className="page-header" style={{ marginTop: 12 }}>
         <h1 style={{ margin: 0 }}>{trip.name}</h1>
-        <div style={{ display: "flex", gap: "0.5rem" }}>
-          <Link to={`/trips/${trip.id}/activities`}>
-            <button>Aktivnosti / kalendar</button>
+        <div className="actions-row">
+          <Link to={`/trips/${trip.id}/activities`} className="btn btn-secondary">
+            📅 Aktivnosti
           </Link>
-          <Link to={`/trips/${trip.id}/expenses`}>
-            <button>Troškovi / budžet</button>
+          <Link to={`/trips/${trip.id}/expenses`} className="btn btn-secondary">
+            💰 Troškovi
           </Link>
-          <Link to={`/trips/${trip.id}/edit`}>
-            <button>Izmeni</button>
+          <Link to={`/trips/${trip.id}/edit`} className="btn btn-secondary">
+            Izmeni
           </Link>
-          <button onClick={handleDeleteTrip}>Obriši</button>
+          <button className="btn btn-danger" onClick={handleDeleteTrip}>
+            Obriši
+          </button>
         </div>
       </div>
 
-      <SharePanel tripId={trip.id} />
+      <div style={{ marginTop: 12 }}>
+        <SharePanel tripId={trip.id} />
+      </div>
 
-      <p>{trip.description}</p>
+      {trip.description && <p style={{ marginTop: 16, fontSize: 15 }}>{trip.description}</p>}
 
-      <dl>
-        <dt>
-          <strong>Period</strong>
-        </dt>
-        <dd>
-          {formatDate(trip.startDate)} — {formatDate(trip.endDate)}
-        </dd>
+      <div className="card" style={{ marginTop: 16, display: "flex", gap: 32, flexWrap: "wrap" }}>
+        <div>
+          <div style={{ fontSize: 12.5, color: "var(--color-text-faint)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.03em" }}>
+            Period
+          </div>
+          <div style={{ fontSize: 15, marginTop: 4 }}>
+            {formatDate(trip.startDate)} — {formatDate(trip.endDate)}
+          </div>
+        </div>
 
-        <dt>
-          <strong>Planirani budžet</strong>
-        </dt>
-        <dd>{formatMoney(trip.budget)}</dd>
+        <div>
+          <div style={{ fontSize: 12.5, color: "var(--color-text-faint)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.03em" }}>
+            Planirani budžet
+          </div>
+          <div style={{ fontSize: 15, marginTop: 4 }}>{formatMoney(trip.budget)}</div>
+        </div>
 
         {trip.notes && (
-          <>
-            <dt>
-              <strong>Napomene</strong>
-            </dt>
-            <dd>{trip.notes}</dd>
-          </>
+          <div style={{ flexBasis: "100%" }}>
+            <div style={{ fontSize: 12.5, color: "var(--color-text-faint)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.03em" }}>
+              Napomene
+            </div>
+            <div style={{ fontSize: 14.5, marginTop: 4 }}>{trip.notes}</div>
+          </div>
         )}
-      </dl>
-
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "2rem" }}>
-        <h2 style={{ margin: 0 }}>Destinacije</h2>
-        <Link to={`/trips/${trip.id}/destinations/new`}>
-          <button>+ Nova destinacija</button>
-        </Link>
       </div>
 
-      {destinations.length === 0 ? (
-        <p>Nema još nijedne destinacije za ovo putovanje.</p>
-      ) : (
-        <div style={{ marginTop: "1rem" }}>
-          {destinations.map((destination) => (
-            <DestinationCard
-              key={destination.id}
-              tripId={trip.id}
-              destination={destination}
-              onDelete={handleDeleteDestination}
-            />
-          ))}
+      <div className="section">
+        <div className="section-header">
+          <h2>Destinacije</h2>
+          <Link to={`/trips/${trip.id}/destinations/new`} className="btn btn-primary btn-sm">
+            + Nova destinacija
+          </Link>
         </div>
-      )}
+
+        {destinations.length === 0 ? (
+          <EmptyState title="Nema još nijedne destinacije" description="Dodaj prvu destinaciju za ovo putovanje." />
+        ) : (
+          <div>
+            {destinations.map((destination) => (
+              <DestinationCard
+                key={destination.id}
+                tripId={trip.id}
+                destination={destination}
+                onDelete={handleDeleteDestination}
+              />
+            ))}
+          </div>
+        )}
+      </div>
 
       <ChecklistSection
         items={checklistItems}

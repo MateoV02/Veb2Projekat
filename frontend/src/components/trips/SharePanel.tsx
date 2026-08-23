@@ -3,12 +3,16 @@ import type { AccessType, ShareLink } from "../../models/Sharing";
 import { ACCESS_TYPE_LABELS } from "../../models/Sharing";
 import { createShareLink, getShareLinks, revokeShareLink } from "../../services/sharingService";
 import { getErrorMessage } from "../../utils/errors";
+import { useToast } from "../../context/ToastContext";
+import { ErrorAlert } from "../ui/Alert";
+import { Spinner } from "../ui/Spinner";
 
 interface SharePanelProps {
   tripId: string;
 }
 
 export function SharePanel({ tripId }: SharePanelProps) {
+  const { showToast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
   const [links, setLinks] = useState<ShareLink[]>([]);
   const [accessType, setAccessType] = useState<AccessType>("View");
@@ -43,56 +47,84 @@ export function SharePanel({ tripId }: SharePanelProps) {
       if (newLink?.token === token) {
         setNewLink(null);
       }
+      showToast("Link za deljenje je opozvan.", "success");
     } catch (err) {
-      setError(getErrorMessage(err, "Greška prilikom brisanja linka."));
+      showToast(getErrorMessage(err, "Greška prilikom brisanja linka."), "error");
     }
   }
 
   if (!isOpen) {
-    return <button onClick={() => setIsOpen(true)}>Podeli plan</button>;
+    return (
+      <button className="btn btn-secondary" onClick={() => setIsOpen(true)}>
+        🔗 Podeli plan
+      </button>
+    );
   }
 
   return (
-    <div style={{ border: "1px solid #ddd", borderRadius: 8, padding: "1rem", marginTop: "1rem", maxWidth: 480 }}>
+    <div className="card fade-in" style={{ marginTop: 16, maxWidth: 480 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <h3 style={{ margin: 0 }}>Deljenje plana</h3>
-        <button onClick={() => setIsOpen(false)}>Zatvori</button>
+        <button className="btn btn-ghost btn-sm" onClick={() => setIsOpen(false)}>
+          Zatvori
+        </button>
       </div>
 
-      <div style={{ display: "flex", gap: "0.5rem", marginTop: "1rem" }}>
-        <select value={accessType} onChange={(e) => setAccessType(e.target.value as AccessType)}>
+      <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
+        <select
+          className="select"
+          value={accessType}
+          onChange={(e) => setAccessType(e.target.value as AccessType)}
+        >
           <option value="View">{ACCESS_TYPE_LABELS.View}</option>
           <option value="Edit">{ACCESS_TYPE_LABELS.Edit}</option>
         </select>
-        <button onClick={handleCreate} disabled={isCreating}>
+        <button className="btn btn-primary" onClick={handleCreate} disabled={isCreating}>
+          {isCreating ? <Spinner /> : null}
           {isCreating ? "Kreiranje..." : "Generiši link"}
         </button>
       </div>
 
-      {error && <p style={{ color: "#c62828" }}>{error}</p>}
+      {error && (
+        <div style={{ marginTop: 12 }}>
+          <ErrorAlert message={error} />
+        </div>
+      )}
 
       {newLink && (
-        <div style={{ marginTop: "1rem", textAlign: "center" }}>
+        <div style={{ marginTop: 16, textAlign: "center", padding: 16, background: "var(--color-bg)", borderRadius: "var(--radius-sm)" }}>
           <img
             src={`data:image/png;base64,${newLink.qrCodeBase64}`}
             alt="QR kod za deljenje"
-            style={{ width: 160, height: 160 }}
+            style={{ width: 160, height: 160, borderRadius: "var(--radius-sm)" }}
           />
-          <p style={{ wordBreak: "break-all", fontSize: "0.85rem" }}>{newLink.shareUrl}</p>
+          <p style={{ wordBreak: "break-all", fontSize: 12.5, marginTop: 10, marginBottom: 0 }}>
+            {newLink.shareUrl}
+          </p>
         </div>
       )}
 
       {links.length > 0 && (
-        <div style={{ marginTop: "1rem" }}>
-          <strong>Aktivni linkovi:</strong>
-          <ul style={{ listStyle: "none", padding: 0 }}>
+        <div style={{ marginTop: 16 }}>
+          <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 8 }}>Aktivni linkovi</div>
+          <ul>
             {links.map((link) => (
               <li
                 key={link.token}
-                style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0.25rem 0" }}
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "8px 0",
+                  borderTop: "1px solid var(--color-border)",
+                }}
               >
-                <span>{ACCESS_TYPE_LABELS[link.accessType]}</span>
-                <button onClick={() => handleRevoke(link.token)}>Opozovi</button>
+                <span className={`badge badge-${link.accessType === "Edit" ? "warning" : "primary"}`}>
+                  {ACCESS_TYPE_LABELS[link.accessType]}
+                </span>
+                <button className="btn btn-ghost btn-sm" onClick={() => handleRevoke(link.token)}>
+                  Opozovi
+                </button>
               </li>
             ))}
           </ul>

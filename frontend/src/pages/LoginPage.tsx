@@ -2,10 +2,14 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
 import { getErrorMessage } from "../utils/errors";
+import { ErrorAlert } from "../components/ui/Alert";
+import { Spinner } from "../components/ui/Spinner";
 
 export function LoginPage() {
   const { login } = useAuth();
+  const { showToast } = useToast();
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
@@ -20,6 +24,7 @@ export function LoginPage() {
 
     try {
       await login(email, password);
+      showToast("Uspešno si prijavljen/a.", "success");
       navigate("/");
     } catch (err) {
       setError(getErrorMessage(err, "Greška prilikom prijave. Pokušaj ponovo."));
@@ -29,43 +34,51 @@ export function LoginPage() {
   }
 
   return (
-    <div style={{ maxWidth: 360, margin: "4rem auto", fontFamily: "sans-serif" }}>
-      <h1>Prijava</h1>
-      <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: "1rem" }}>
-          <label htmlFor="email">Email</label>
-          <input
-            id="email"
-            type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            style={{ width: "100%", padding: "0.5rem" }}
-          />
-        </div>
+    <div
+      className="page page--narrow fade-in"
+      style={{ minHeight: "100vh", display: "flex", flexDirection: "column", justifyContent: "center" }}
+    >
+      <div className="card">
+        <h1 style={{ textAlign: "center" }}>✈ Trip Planner</h1>
+        <p style={{ textAlign: "center", marginBottom: 24 }}>Prijavi se na svoj nalog</p>
 
-        <div style={{ marginBottom: "1rem" }}>
-          <label htmlFor="password">Lozinka</label>
-          <input
-            id="password"
-            type="password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            style={{ width: "100%", padding: "0.5rem" }}
-          />
-        </div>
+        <form onSubmit={handleSubmit}>
+          <div className="field">
+            <label htmlFor="email">Email</label>
+            <input
+              id="email"
+              type="email"
+              className="input"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
 
-        {error && <p style={{ color: "#c62828" }}>{error}</p>}
+          <div className="field">
+            <label htmlFor="password">Lozinka</label>
+            <input
+              id="password"
+              type="password"
+              className="input"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
 
-        <button type="submit" disabled={isSubmitting} style={{ width: "100%", padding: "0.5rem" }}>
-          {isSubmitting ? "Prijavljivanje..." : "Prijavi se"}
-        </button>
-      </form>
+          {error && <ErrorAlert message={error} />}
 
-      <p style={{ marginTop: "1rem" }}>
-        Nemaš nalog? <Link to="/register">Registruj se</Link>
-      </p>
+          <button type="submit" className="btn btn-primary btn-block" disabled={isSubmitting}>
+            {isSubmitting ? <Spinner /> : null}
+            {isSubmitting ? "Prijavljivanje..." : "Prijavi se"}
+          </button>
+        </form>
+
+        <p style={{ marginTop: 20, textAlign: "center", fontSize: 14 }}>
+          Nemaš nalog? <Link to="/register">Registruj se</Link>
+        </p>
+      </div>
     </div>
   );
 }

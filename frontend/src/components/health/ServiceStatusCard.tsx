@@ -5,13 +5,16 @@ interface ServiceStatusCardProps {
 }
 
 export function ServiceStatusCard({ name, loading, online }: ServiceStatusCardProps) {
-  const label = loading ? "provera..." : online ? "dostupan" : "nedostupan";
-  const color = loading ? "#999" : online ? "#2e7d32" : "#c62828";
+  const tone = loading ? "neutral" : online ? "success" : "danger";
+  const label = loading ? "Provera..." : online ? "Dostupan" : "Nedostupan";
 
   return (
-    <div style={{ border: "1px solid #ddd", borderRadius: 8, padding: "1rem", minWidth: 180 }}>
-      <strong>{name}</strong>
-      <div style={{ color, marginTop: 4 }}>{label}</div>
+    <div className="card" style={{ minWidth: 190, padding: "14px 18px" }}>
+      <div style={{ fontSize: 13.5, fontWeight: 600, marginBottom: 8 }}>{name}</div>
+      <span className={`badge badge-${tone}`}>
+        <span className="badge-dot" />
+        {label}
+      </span>
     </div>
   );
 }

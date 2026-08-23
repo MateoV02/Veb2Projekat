@@ -3,35 +3,36 @@ import type { Expense } from "../../models/Expense";
 import { EXPENSE_CATEGORY_LABELS } from "../../models/Expense";
 import { formatDate, formatMoney } from "../../utils/format";
 
-interface ExpenseCardProps {
+export function ExpenseCard({
+  tripId,
+  expense,
+  onDelete,
+}: {
   tripId: string;
   expense: Expense;
   onDelete: (id: string) => void;
-}
-
-export function ExpenseCard({ tripId, expense, onDelete }: ExpenseCardProps) {
+}) {
   return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        border: "1px solid #eee",
-        borderRadius: 6,
-        padding: "0.6rem 0.75rem",
-        marginBottom: "0.5rem",
-      }}
-    >
-      <div>
-        <strong>{expense.name}</strong>
-        <span style={{ color: "#555" }}> · {EXPENSE_CATEGORY_LABELS[expense.category]} · {formatDate(expense.date)}</span>
-        {expense.description && <p style={{ margin: "0.25rem 0", color: "#555" }}>{expense.description}</p>}
+    <div className="list-item" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <div style={{ minWidth: 0 }}>
+        <div style={{ fontWeight: 600, fontSize: 14.5 }}>{expense.name}</div>
+        <div style={{ fontSize: 13, color: "var(--color-text-muted)", marginTop: 3 }}>
+          <span className="badge badge-neutral" style={{ marginRight: 6 }}>
+            {EXPENSE_CATEGORY_LABELS[expense.category]}
+          </span>
+          {formatDate(expense.date)}
+        </div>
+        {expense.description && <p style={{ margin: "6px 0 0", fontSize: 13.5 }}>{expense.description}</p>}
       </div>
 
-      <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-        <strong>{formatMoney(expense.amount)}</strong>
-        <Link to={`/trips/${tripId}/expenses/${expense.id}/edit`}>Izmeni</Link>
-        <button onClick={() => onDelete(expense.id)}>Obriši</button>
+      <div style={{ display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
+        <strong style={{ fontSize: 15 }}>{formatMoney(expense.amount)}</strong>
+        <Link to={`/trips/${tripId}/expenses/${expense.id}/edit`} className="btn btn-secondary btn-sm">
+          Izmeni
+        </Link>
+        <button className="btn btn-danger btn-sm" onClick={() => onDelete(expense.id)}>
+          Obriši
+        </button>
       </div>
     </div>
   );

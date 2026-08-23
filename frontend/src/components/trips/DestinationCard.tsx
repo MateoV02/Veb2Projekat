@@ -10,19 +10,27 @@ interface DestinationCardProps {
 
 export function DestinationCard({ tripId, destination, onDelete }: DestinationCardProps) {
   return (
-    <div style={{ border: "1px solid #eee", borderRadius: 6, padding: "0.75rem", marginBottom: "0.75rem" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start" }}>
-        <div>
-          <strong>{destination.name}</strong> — {destination.location}
-          <p style={{ margin: "0.25rem 0" }}>
-            {formatDate(destination.arrivalDate)} — {formatDate(destination.departureDate)}
-          </p>
-          {destination.notes && <p style={{ margin: "0.25rem 0", color: "#555" }}>{destination.notes}</p>}
+    <div className="list-item">
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12 }}>
+        <div style={{ minWidth: 0 }}>
+          <div style={{ fontWeight: 600, fontSize: 14.5 }}>
+            {destination.name} <span style={{ color: "var(--color-text-muted)", fontWeight: 400 }}>— {destination.location}</span>
+          </div>
+          <div style={{ fontSize: 13, color: "var(--color-text-muted)", marginTop: 4 }}>
+            📅 {formatDate(destination.arrivalDate)} — {formatDate(destination.departureDate)}
+          </div>
+          {destination.notes && (
+            <p style={{ margin: "6px 0 0", fontSize: 13.5 }}>{destination.notes}</p>
+          )}
         </div>
 
-        <div style={{ display: "flex", gap: "0.5rem" }}>
-          <Link to={`/trips/${tripId}/destinations/${destination.id}/edit`}>Izmeni</Link>
-          <button onClick={() => onDelete(destination.id)}>Obriši</button>
+        <div className="actions-row" style={{ flexShrink: 0 }}>
+          <Link to={`/trips/${tripId}/destinations/${destination.id}/edit`} className="btn btn-secondary btn-sm">
+            Izmeni
+          </Link>
+          <button className="btn btn-danger btn-sm" onClick={() => onDelete(destination.id)}>
+            Obriši
+          </button>
         </div>
       </div>
     </div>

@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { createDestination, getDestinationById, updateDestination } from "../services/destinationService";
 import type { DestinationRequest } from "../models/Destination";
 import { getErrorMessage } from "../utils/errors";
 import { toDateInputValue } from "../utils/format";
+import { useToast } from "../context/ToastContext";
+import { ErrorAlert } from "../components/ui/Alert";
+import { Spinner, LoadingRow } from "../components/ui/Spinner";
 
 const EMPTY_FORM: DestinationRequest = {
   name: "",
@@ -18,6 +21,7 @@ export function DestinationFormPage() {
   const { tripId, destinationId } = useParams<{ tripId: string; destinationId: string }>();
   const isEditMode = Boolean(destinationId);
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   const [form, setForm] = useState<DestinationRequest>(EMPTY_FORM);
   const [isLoading, setIsLoading] = useState(isEditMode);
@@ -64,8 +68,10 @@ export function DestinationFormPage() {
     try {
       if (isEditMode && destinationId) {
         await updateDestination(tripId, destinationId, form);
+        showToast("Destinacija je sačuvana.", "success");
       } else {
         await createDestination(tripId, form);
+        showToast("Destinacija je dodata.", "success");
       }
       navigate(`/trips/${tripId}`);
     } catch (err) {
@@ -76,79 +82,85 @@ export function DestinationFormPage() {
   }
 
   if (isLoading) {
-    return <p>Učitavanje...</p>;
+    return (
+      <div className="page page--narrow">
+        <LoadingRow />
+      </div>
+    );
   }
 
   return (
-    <div style={{ maxWidth: 480 }}>
-      <h1>{isEditMode ? "Izmena destinacije" : "Nova destinacija"}</h1>
+    <div className="page page--narrow fade-in">
+      <Link to={tripId ? `/trips/${tripId}` : "/trips"}>← Nazad na plan putovanja</Link>
+      <h1 style={{ marginTop: 12 }}>{isEditMode ? "Izmena destinacije" : "Nova destinacija"}</h1>
 
-      <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: "1rem" }}>
+      <form onSubmit={handleSubmit} className="card">
+        <div className="field">
           <label htmlFor="name">Naziv</label>
           <input
             id="name"
             type="text"
+            className="input"
             required
             maxLength={150}
             value={form.name}
             onChange={(e) => updateField("name", e.target.value)}
-            style={{ width: "100%", padding: "0.5rem" }}
           />
         </div>
 
-        <div style={{ marginBottom: "1rem" }}>
+        <div className="field">
           <label htmlFor="location">Lokacija</label>
           <input
             id="location"
             type="text"
+            className="input"
             required
             maxLength={200}
             value={form.location}
             onChange={(e) => updateField("location", e.target.value)}
-            style={{ width: "100%", padding: "0.5rem" }}
           />
         </div>
 
-        <div style={{ display: "flex", gap: "1rem", marginBottom: "1rem" }}>
-          <div style={{ flex: 1 }}>
+        <div className="field-row">
+          <div className="field">
             <label htmlFor="arrivalDate">Datum dolaska</label>
             <input
               id="arrivalDate"
               type="date"
+              className="input"
               required
               value={form.arrivalDate}
               onChange={(e) => updateField("arrivalDate", e.target.value)}
-              style={{ width: "100%", padding: "0.5rem" }}
             />
           </div>
 
-          <div style={{ flex: 1 }}>
+          <div className="field">
             <label htmlFor="departureDate">Datum odlaska</label>
             <input
               id="departureDate"
               type="date"
+              className="input"
               required
               value={form.departureDate}
               onChange={(e) => updateField("departureDate", e.target.value)}
-              style={{ width: "100%", padding: "0.5rem" }}
             />
           </div>
         </div>
 
-        <div style={{ marginBottom: "1rem" }}>
+        <div className="field">
           <label htmlFor="notes">Napomena</label>
           <textarea
             id="notes"
+            className="textarea"
             value={form.notes}
             onChange={(e) => updateField("notes", e.target.value)}
-            style={{ width: "100%", padding: "0.5rem" }}
           />
         </div>
 
-        {error && <p style={{ color: "#c62828" }}>{error}</p>}
+        {error && <ErrorAlert message={error} />}
 
-        <button type="submit" disabled={isSubmitting}>
+        <button type="submit" className="btn btn-primary btn-block" disabled={isSubmitting}>
+          {isSubmitting ? <Spinner /> : null}
           {isSubmitting ? "Čuvanje..." : "Sačuvaj"}
         </button>
       </form>

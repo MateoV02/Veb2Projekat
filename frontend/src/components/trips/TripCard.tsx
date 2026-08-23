@@ -9,22 +9,30 @@ interface TripCardProps {
 
 export function TripCard({ trip, onDelete }: TripCardProps) {
   return (
-    <div style={{ border: "1px solid #ddd", borderRadius: 8, padding: "1rem", marginBottom: "1rem" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start" }}>
-        <div>
-          <h3 style={{ margin: 0 }}>
+    <div className="card card--interactive" style={{ marginBottom: 12 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12 }}>
+        <div style={{ minWidth: 0 }}>
+          <h3 style={{ marginBottom: 6 }}>
             <Link to={`/trips/${trip.id}`}>{trip.name}</Link>
           </h3>
-          <p style={{ margin: "0.25rem 0", color: "#555" }}>{trip.description}</p>
-          <p style={{ margin: "0.25rem 0" }}>
-            {formatDate(trip.startDate)} — {formatDate(trip.endDate)}
-          </p>
-          <p style={{ margin: "0.25rem 0" }}>Budžet: {formatMoney(trip.budget)}</p>
+          {trip.description && (
+            <p style={{ margin: "0 0 8px", fontSize: 14 }}>{trip.description}</p>
+          )}
+          <div style={{ display: "flex", gap: 14, fontSize: 13.5, color: "var(--color-text-muted)" }}>
+            <span>
+              📅 {formatDate(trip.startDate)} — {formatDate(trip.endDate)}
+            </span>
+            <span>💰 {formatMoney(trip.budget)}</span>
+          </div>
         </div>
 
-        <div style={{ display: "flex", gap: "0.5rem" }}>
-          <Link to={`/trips/${trip.id}/edit`}>Izmeni</Link>
-          <button onClick={() => onDelete(trip.id)}>Obriši</button>
+        <div className="actions-row" style={{ flexShrink: 0 }}>
+          <Link to={`/trips/${trip.id}/edit`} className="btn btn-secondary btn-sm">
+            Izmeni
+          </Link>
+          <button className="btn btn-danger btn-sm" onClick={() => onDelete(trip.id)}>
+            Obriši
+          </button>
         </div>
       </div>
     </div>

@@ -2,10 +2,14 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
 import { getErrorMessage } from "../utils/errors";
+import { ErrorAlert } from "../components/ui/Alert";
+import { Spinner } from "../components/ui/Spinner";
 
 export function RegisterPage() {
   const { register } = useAuth();
+  const { showToast } = useToast();
   const navigate = useNavigate();
 
   const [name, setName] = useState("");
@@ -27,6 +31,7 @@ export function RegisterPage() {
 
     try {
       await register(name, email, password);
+      showToast("Nalog je uspešno kreiran. Dobrodošao/la!", "success");
       navigate("/");
     } catch (err) {
       setError(getErrorMessage(err, "Greška prilikom registracije. Pokušaj ponovo."));
@@ -36,56 +41,65 @@ export function RegisterPage() {
   }
 
   return (
-    <div style={{ maxWidth: 360, margin: "4rem auto", fontFamily: "sans-serif" }}>
-      <h1>Registracija</h1>
-      <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: "1rem" }}>
-          <label htmlFor="name">Ime</label>
-          <input
-            id="name"
-            type="text"
-            required
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            style={{ width: "100%", padding: "0.5rem" }}
-          />
-        </div>
+    <div
+      className="page page--narrow fade-in"
+      style={{ minHeight: "100vh", display: "flex", flexDirection: "column", justifyContent: "center" }}
+    >
+      <div className="card">
+        <h1 style={{ textAlign: "center" }}>✈ Trip Planner</h1>
+        <p style={{ textAlign: "center", marginBottom: 24 }}>Kreiraj novi nalog</p>
 
-        <div style={{ marginBottom: "1rem" }}>
-          <label htmlFor="email">Email</label>
-          <input
-            id="email"
-            type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            style={{ width: "100%", padding: "0.5rem" }}
-          />
-        </div>
+        <form onSubmit={handleSubmit}>
+          <div className="field">
+            <label htmlFor="name">Ime</label>
+            <input
+              id="name"
+              type="text"
+              className="input"
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </div>
 
-        <div style={{ marginBottom: "1rem" }}>
-          <label htmlFor="password">Lozinka</label>
-          <input
-            id="password"
-            type="password"
-            required
-            minLength={6}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            style={{ width: "100%", padding: "0.5rem" }}
-          />
-        </div>
+          <div className="field">
+            <label htmlFor="email">Email</label>
+            <input
+              id="email"
+              type="email"
+              className="input"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
 
-        {error && <p style={{ color: "#c62828" }}>{error}</p>}
+          <div className="field">
+            <label htmlFor="password">Lozinka</label>
+            <input
+              id="password"
+              type="password"
+              className="input"
+              required
+              minLength={6}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <div className="field-hint">Najmanje 6 karaktera.</div>
+          </div>
 
-        <button type="submit" disabled={isSubmitting} style={{ width: "100%", padding: "0.5rem" }}>
-          {isSubmitting ? "Kreiranje naloga..." : "Registruj se"}
-        </button>
-      </form>
+          {error && <ErrorAlert message={error} />}
 
-      <p style={{ marginTop: "1rem" }}>
-        Već imaš nalog? <Link to="/login">Prijavi se</Link>
-      </p>
+          <button type="submit" className="btn btn-primary btn-block" disabled={isSubmitting}>
+            {isSubmitting ? <Spinner /> : null}
+            {isSubmitting ? "Kreiranje naloga..." : "Registruj se"}
+          </button>
+        </form>
+
+        <p style={{ marginTop: 20, textAlign: "center", fontSize: 14 }}>
+          Već imaš nalog? <Link to="/login">Prijavi se</Link>
+        </p>
+      </div>
     </div>
   );
 }

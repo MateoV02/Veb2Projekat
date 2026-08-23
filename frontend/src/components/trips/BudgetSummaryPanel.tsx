@@ -12,29 +12,52 @@ export function BudgetSummaryPanel({ summary }: BudgetSummaryPanelProps) {
   const isOverBudget = summary.remainingBudget < 0;
 
   return (
-    <div style={{ border: "1px solid #ddd", borderRadius: 8, padding: "1rem", marginBottom: "1rem" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem" }}>
-        <span>Planirani budžet: <strong>{formatMoney(summary.plannedBudget)}</strong></span>
-        <span>Potrošeno: <strong>{formatMoney(summary.totalSpent)}</strong></span>
-        <span style={{ color: isOverBudget ? "#c62828" : "#2e7d32" }}>
-          Preostalo: <strong>{formatMoney(summary.remainingBudget)}</strong>
-        </span>
+    <div className="card" style={{ marginBottom: 20 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 12, marginBottom: 12 }}>
+        <div>
+          <div style={{ fontSize: 12, color: "var(--color-text-faint)", fontWeight: 600, textTransform: "uppercase" }}>
+            Planirani budžet
+          </div>
+          <div style={{ fontSize: 17, fontWeight: 700, marginTop: 2 }}>{formatMoney(summary.plannedBudget)}</div>
+        </div>
+        <div>
+          <div style={{ fontSize: 12, color: "var(--color-text-faint)", fontWeight: 600, textTransform: "uppercase" }}>
+            Potrošeno
+          </div>
+          <div style={{ fontSize: 17, fontWeight: 700, marginTop: 2 }}>{formatMoney(summary.totalSpent)}</div>
+        </div>
+        <div>
+          <div style={{ fontSize: 12, color: "var(--color-text-faint)", fontWeight: 600, textTransform: "uppercase" }}>
+            Preostalo
+          </div>
+          <div
+            style={{
+              fontSize: 17,
+              fontWeight: 700,
+              marginTop: 2,
+              color: isOverBudget ? "var(--color-danger)" : "var(--color-success)",
+            }}
+          >
+            {formatMoney(summary.remainingBudget)}
+          </div>
+        </div>
       </div>
 
-      <div style={{ height: 10, background: "#eee", borderRadius: 5, overflow: "hidden" }}>
+      <div style={{ height: 10, background: "var(--color-bg)", borderRadius: "var(--radius-full)", overflow: "hidden" }}>
         <div
           style={{
             height: "100%",
             width: `${spentRatio * 100}%`,
-            background: isOverBudget ? "#c62828" : "#1a56db",
+            background: isOverBudget ? "var(--color-danger)" : "var(--color-primary)",
+            transition: "width var(--transition)",
           }}
         />
       </div>
 
       {isOverBudget && (
-        <p style={{ color: "#c62828", marginTop: "0.5rem" }}>
+        <div className="alert alert-error" style={{ marginTop: 12, marginBottom: 0 }}>
           Prekoračen je planirani budžet!
-        </p>
+        </div>
       )}
     </div>
   );

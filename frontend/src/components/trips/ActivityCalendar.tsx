@@ -55,18 +55,25 @@ export function ActivityCalendar({
   }, {});
 
   return (
-    <div style={{ maxWidth: 420 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
-        <button onClick={() => onMonthChange(-1)}>‹</button>
-        <strong>
+    <div className="card" style={{ maxWidth: 460, padding: 20 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+        <button className="btn btn-ghost btn-icon" onClick={() => onMonthChange(-1)} aria-label="Prethodni mesec">
+          ‹
+        </button>
+        <strong style={{ fontSize: 15 }}>
           {MONTH_LABELS[currentMonth]} {monthDate.getFullYear()}
         </strong>
-        <button onClick={() => onMonthChange(1)}>›</button>
+        <button className="btn btn-ghost btn-icon" onClick={() => onMonthChange(1)} aria-label="Sledeći mesec">
+          ›
+        </button>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 4 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 6 }}>
         {WEEKDAY_LABELS.map((label) => (
-          <div key={label} style={{ textAlign: "center", fontSize: "0.8rem", color: "#888" }}>
+          <div
+            key={label}
+            style={{ textAlign: "center", fontSize: 11.5, fontWeight: 600, color: "var(--color-text-faint)" }}
+          >
             {label}
           </div>
         ))}
@@ -82,16 +89,21 @@ export function ActivityCalendar({
               key={key}
               onClick={() => onSelectDate(key)}
               style={{
-                padding: "0.4rem 0",
-                border: isSelected ? "2px solid #333" : "1px solid #eee",
-                borderRadius: 4,
-                background: count > 0 ? "#e8f0fe" : "white",
-                color: isCurrentMonth ? "#000" : "#bbb",
+                padding: "6px 0",
+                border: isSelected ? "2px solid var(--color-primary)" : "1px solid var(--color-border)",
+                borderRadius: "var(--radius-sm)",
+                background: count > 0 ? "var(--color-primary-light)" : "var(--color-surface)",
+                color: isCurrentMonth ? "var(--color-text)" : "var(--color-text-faint)",
                 cursor: "pointer",
+                transition: "border-color var(--transition-fast), transform var(--transition-fast)",
               }}
             >
-              <div>{cell.getDate()}</div>
-              {count > 0 && <div style={{ fontSize: "0.7rem", color: "#1a56db" }}>{count} akt.</div>}
+              <div style={{ fontSize: 13 }}>{cell.getDate()}</div>
+              {count > 0 && (
+                <div style={{ fontSize: 10.5, color: "var(--color-primary-text)", fontWeight: 600 }}>
+                  {count} akt.
+                </div>
+              )}
             </button>
           );
         })}

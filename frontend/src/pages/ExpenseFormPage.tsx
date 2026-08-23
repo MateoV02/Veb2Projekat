@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { createExpense, getExpenseById, updateExpense } from "../services/expenseService";
 import type { ExpenseCategory, ExpenseRequest } from "../models/Expense";
 import { EXPENSE_CATEGORY_LABELS } from "../models/Expense";
 import { getErrorMessage } from "../utils/errors";
 import { toDateInputValue } from "../utils/format";
+import { useToast } from "../context/ToastContext";
+import { ErrorAlert } from "../components/ui/Alert";
+import { Spinner, LoadingRow } from "../components/ui/Spinner";
 
 const CATEGORY_OPTIONS: ExpenseCategory[] = [
   "Transport",
@@ -20,6 +23,7 @@ export function ExpenseFormPage() {
   const { tripId, expenseId } = useParams<{ tripId: string; expenseId: string }>();
   const isEditMode = Boolean(expenseId);
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   const [form, setForm] = useState<ExpenseRequest>({
     tripPlanId: tripId ?? "",
@@ -70,8 +74,10 @@ export function ExpenseFormPage() {
     try {
       if (isEditMode && expenseId) {
         await updateExpense(expenseId, form);
+        showToast("Trošak je sačuvan.", "success");
       } else {
         await createExpense(form);
+        showToast("Trošak je dodat.", "success");
       }
       navigate(`/trips/${tripId}/expenses`);
     } catch (err) {
@@ -82,34 +88,39 @@ export function ExpenseFormPage() {
   }
 
   if (isLoading) {
-    return <p>Učitavanje...</p>;
+    return (
+      <div className="page page--narrow">
+        <LoadingRow />
+      </div>
+    );
   }
 
   return (
-    <div style={{ maxWidth: 480 }}>
-      <h1>{isEditMode ? "Izmena troška" : "Novi trošak"}</h1>
+    <div className="page page--narrow fade-in">
+      <Link to={tripId ? `/trips/${tripId}/expenses` : "/trips"}>← Nazad na troškove</Link>
+      <h1 style={{ marginTop: 12 }}>{isEditMode ? "Izmena troška" : "Novi trošak"}</h1>
 
-      <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: "1rem" }}>
+      <form onSubmit={handleSubmit} className="card">
+        <div className="field">
           <label htmlFor="name">Naziv</label>
           <input
             id="name"
             type="text"
+            className="input"
             required
             maxLength={150}
             value={form.name}
             onChange={(e) => updateField("name", e.target.value)}
-            style={{ width: "100%", padding: "0.5rem" }}
           />
         </div>
 
-        <div style={{ marginBottom: "1rem" }}>
+        <div className="field">
           <label htmlFor="category">Kategorija</label>
           <select
             id="category"
+            className="select"
             value={form.category}
             onChange={(e) => updateField("category", e.target.value as ExpenseCategory)}
-            style={{ width: "100%", padding: "0.5rem" }}
           >
             {CATEGORY_OPTIONS.map((category) => (
               <option key={category} value={category}>
@@ -119,46 +130,47 @@ export function ExpenseFormPage() {
           </select>
         </div>
 
-        <div style={{ marginBottom: "1rem" }}>
+        <div className="field">
           <label htmlFor="amount">Iznos</label>
           <input
             id="amount"
             type="number"
+            className="input"
             min={0.01}
             step="0.01"
             required
             value={form.amount}
             onChange={(e) => updateField("amount", Number(e.target.value))}
-            style={{ width: "100%", padding: "0.5rem" }}
           />
         </div>
 
-        <div style={{ marginBottom: "1rem" }}>
+        <div className="field">
           <label htmlFor="date">Datum</label>
           <input
             id="date"
             type="date"
+            className="input"
             required
             value={form.date}
             onChange={(e) => updateField("date", e.target.value)}
-            style={{ width: "100%", padding: "0.5rem" }}
           />
         </div>
 
-        <div style={{ marginBottom: "1rem" }}>
+        <div className="field">
           <label htmlFor="description">Opis</label>
           <textarea
             id="description"
+            className="textarea"
             maxLength={500}
             value={form.description}
             onChange={(e) => updateField("description", e.target.value)}
-            style={{ width: "100%", padding: "0.5rem" }}
           />
         </div>
 
-        {error && <p style={{ color: "#c62828" }}>{error}</p>}
+        {error && <ErrorAlert message={error} />}
 
-        <button type="submit" disabled={isSubmitting}>
+        <button type="submit" className="btn btn-primary btn-block" disabled={isSubmitting}>
+          {isSubmitting ? <Spinner /> : null}
           {isSubmitting ? "Čuvanje..." : "Sačuvaj"}
         </button>
       </form>

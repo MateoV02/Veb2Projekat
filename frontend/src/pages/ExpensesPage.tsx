@@ -6,10 +6,15 @@ import type { TripPlan } from "../models/Trip";
 import type { BudgetSummary, Expense } from "../models/Expense";
 import { BudgetSummaryPanel } from "../components/trips/BudgetSummaryPanel";
 import { ExpenseCard } from "../components/trips/ExpenseCard";
+import { EmptyState } from "../components/ui/EmptyState";
+import { ErrorAlert } from "../components/ui/Alert";
+import { LoadingRow } from "../components/ui/Spinner";
 import { getErrorMessage } from "../utils/errors";
+import { useToast } from "../context/ToastContext";
 
 export function ExpensesPage() {
   const { id } = useParams<{ id: string }>();
+  const { showToast } = useToast();
 
   const [trip, setTrip] = useState<TripPlan | null>(null);
   const [expenses, setExpenses] = useState<Expense[]>([]);
@@ -46,39 +51,46 @@ export function ExpensesPage() {
       const [expensesResult, summaryResult] = await Promise.all([getExpenses(id), getBudgetSummary(id)]);
       setExpenses(expensesResult);
       setSummary(summaryResult);
+      showToast("Trošak je obrisan.", "success");
     } catch (err) {
-      setError(getErrorMessage(err, "Greška prilikom brisanja troška."));
+      showToast(getErrorMessage(err, "Greška prilikom brisanja troška."), "error");
     }
   }
 
   if (isLoading) {
-    return <p>Učitavanje...</p>;
+    return (
+      <div className="page">
+        <LoadingRow />
+      </div>
+    );
   }
 
   if (error || !trip || !id) {
     return (
-      <div>
-        <p style={{ color: "#c62828" }}>{error ?? "Plan putovanja nije pronađen."}</p>
+      <div className="page">
+        <ErrorAlert message={error ?? "Plan putovanja nije pronađen."} />
         <Link to="/trips">← Nazad na listu</Link>
       </div>
     );
   }
 
   return (
-    <div style={{ maxWidth: 700 }}>
+    <div className="page fade-in">
       <Link to={`/trips/${id}`}>← Nazad na plan putovanja</Link>
 
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "1rem" }}>
+      <div className="page-header" style={{ marginTop: 12 }}>
         <h1 style={{ margin: 0 }}>Troškovi — {trip.name}</h1>
-        <Link to={`/trips/${id}/expenses/new`}>
-          <button>+ Novi trošak</button>
+        <Link to={`/trips/${id}/expenses/new`} className="btn btn-primary">
+          + Novi trošak
         </Link>
       </div>
 
-      {summary && <BudgetSummaryPanel summary={summary} />}
+      <div style={{ marginTop: 20 }}>
+        {summary && <BudgetSummaryPanel summary={summary} />}
+      </div>
 
       {expenses.length === 0 ? (
-        <p>Nema još nijednog troška za ovo putovanje.</p>
+        <EmptyState title="Nema još nijednog troška" description="Dodaj prvi trošak za ovo putovanje." />
       ) : (
         <div>
           {expenses.map((expense) => (
