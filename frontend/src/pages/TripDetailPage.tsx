@@ -13,6 +13,7 @@ import type { Destination } from "../models/Destination";
 import type { ChecklistItem } from "../models/Checklist";
 import { DestinationCard } from "../components/trips/DestinationCard";
 import { ChecklistSection } from "../components/trips/ChecklistSection";
+import { SharePanel } from "../components/trips/SharePanel";
 import { getErrorMessage } from "../utils/errors";
 import { formatDate, formatMoney } from "../utils/format";
 
@@ -141,6 +142,8 @@ export function TripDetailPage() {
           <button onClick={handleDeleteTrip}>Obriši</button>
         </div>
       </div>
+
+      <SharePanel tripId={trip.id} />
 
       <p>{trip.description}</p>
 

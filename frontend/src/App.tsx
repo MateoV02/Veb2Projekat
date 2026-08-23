@@ -13,6 +13,7 @@ import { ActivitiesPage } from "./pages/ActivitiesPage";
 import { ActivityFormPage } from "./pages/ActivityFormPage";
 import { ExpensesPage } from "./pages/ExpensesPage";
 import { ExpenseFormPage } from "./pages/ExpenseFormPage";
+import { SharedTripPage } from "./pages/SharedTripPage";
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/shared/:token" element={<SharedTripPage />} />
 
           <Route
             element={

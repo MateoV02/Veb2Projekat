@@ -37,6 +37,33 @@ namespace TripService.Services
             return trip == null ? null : _mapper.Map<TripPlanDto>(trip);
         }
 
+        public async Task<TripPlanDto> GetByIdSharedAsync(Guid tripId)
+        {
+            var trip = await _dbContext.TripPlans.FirstOrDefaultAsync(t => t.Id == tripId);
+            return trip == null ? null : _mapper.Map<TripPlanDto>(trip);
+        }
+
+        public async Task<TripPlanDto> UpdateSharedAsync(Guid tripId, TripPlanRequestDto request)
+        {
+            var trip = await _dbContext.TripPlans.FirstOrDefaultAsync(t => t.Id == tripId);
+            if (trip == null)
+            {
+                return null;
+            }
+
+            trip.Name = request.Name;
+            trip.Description = request.Description;
+            trip.StartDate = request.StartDate;
+            trip.EndDate = request.EndDate;
+            trip.Budget = request.Budget;
+            trip.Notes = request.Notes;
+            trip.UpdatedAt = DateTime.UtcNow;
+
+            await _dbContext.SaveChangesAsync();
+
+            return _mapper.Map<TripPlanDto>(trip);
+        }
+
         public async Task<TripPlanDto> CreateAsync(Guid userId, TripPlanRequestDto request)
         {
             var trip = new TripPlan

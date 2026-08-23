@@ -1,3 +1,4 @@
+using System;
 using System.Text;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -8,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
+using TripService.Clients;
 using TripService.Data;
 using TripService.Mapping;
 using TripService.Services;
@@ -50,6 +52,12 @@ namespace TripService
             services.AddScoped<IDestinationService, DestinationService>();
             services.AddScoped<IActivityService, ActivityService>();
             services.AddScoped<IChecklistService, ChecklistService>();
+
+            services.AddHttpClient<ISharingServiceClient, SharingServiceClient>(client =>
+            {
+                var baseUrl = Configuration["Services:SharingServiceBaseUrl"];
+                client.BaseAddress = new Uri(baseUrl.EndsWith("/") ? baseUrl : baseUrl + "/");
+            });
 
             var jwtSection = Configuration.GetSection("Jwt");
 

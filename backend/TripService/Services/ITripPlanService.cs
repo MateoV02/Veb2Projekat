@@ -11,6 +11,12 @@ namespace TripService.Services
 
         Task<TripPlanDto> GetByIdAsync(Guid userId, Guid tripId);
 
+        /// <summary>Bez provere vlasništva — koristi se za pristup preko deljenog (share) linka.</summary>
+        Task<TripPlanDto> GetByIdSharedAsync(Guid tripId);
+
+        /// <summary>Bez provere vlasništva — koristi se za izmenu preko deljenog (share) linka sa EDIT pristupom.</summary>
+        Task<TripPlanDto> UpdateSharedAsync(Guid tripId, TripPlanRequestDto request);
+
         Task<TripPlanDto> CreateAsync(Guid userId, TripPlanRequestDto request);
 
         Task<TripPlanDto> UpdateAsync(Guid userId, Guid tripId, TripPlanRequestDto request);
