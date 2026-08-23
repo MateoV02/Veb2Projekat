@@ -11,6 +11,7 @@ namespace TripService.Mapping
             CreateMap<TripPlan, TripPlanDto>();
             CreateMap<Destination, DestinationDto>();
             CreateMap<Activity, ActivityDto>();
+            CreateMap<ChecklistItem, ChecklistItemDto>();
         }
     }
 }

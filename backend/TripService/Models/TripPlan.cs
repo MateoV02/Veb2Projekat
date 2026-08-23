@@ -28,5 +28,7 @@ namespace TripService.Models
         public ICollection<Destination> Destinations { get; set; } = new List<Destination>();
 
         public ICollection<Activity> Activities { get; set; } = new List<Activity>();
+
+        public ICollection<ChecklistItem> ChecklistItems { get; set; } = new List<ChecklistItem>();
     }
 }

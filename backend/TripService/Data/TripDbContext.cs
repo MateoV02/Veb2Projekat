@@ -16,6 +16,8 @@ namespace TripService.Data
 
         public DbSet<Activity> Activities { get; set; }
 
+        public DbSet<ChecklistItem> ChecklistItems { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<TripPlan>(entity =>
@@ -83,6 +85,22 @@ namespace TripService.Data
                     .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasIndex(a => a.TripPlanId);
+            });
+
+            modelBuilder.Entity<ChecklistItem>(entity =>
+            {
+                entity.HasKey(c => c.Id);
+
+                entity.Property(c => c.Text)
+                    .IsRequired()
+                    .HasMaxLength(200);
+
+                entity.HasOne(c => c.TripPlan)
+                    .WithMany(t => t.ChecklistItems)
+                    .HasForeignKey(c => c.TripPlanId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasIndex(c => c.TripPlanId);
             });
         }
     }

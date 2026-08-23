@@ -2,9 +2,17 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { deleteTrip, getTripById } from "../services/tripService";
 import { deleteDestination, getDestinations } from "../services/destinationService";
+import {
+  createChecklistItem,
+  deleteChecklistItem,
+  getChecklistItems,
+  updateChecklistItem,
+} from "../services/checklistService";
 import type { TripPlan } from "../models/Trip";
 import type { Destination } from "../models/Destination";
+import type { ChecklistItem } from "../models/Checklist";
 import { DestinationCard } from "../components/trips/DestinationCard";
+import { ChecklistSection } from "../components/trips/ChecklistSection";
 import { getErrorMessage } from "../utils/errors";
 import { formatDate, formatMoney } from "../utils/format";
 
@@ -14,6 +22,7 @@ export function TripDetailPage() {
 
   const [trip, setTrip] = useState<TripPlan | null>(null);
   const [destinations, setDestinations] = useState<Destination[]>([]);
+  const [checklistItems, setChecklistItems] = useState<ChecklistItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -22,14 +31,57 @@ export function TripDetailPage() {
       return;
     }
 
-    Promise.all([getTripById(id), getDestinations(id)])
-      .then(([tripResult, destinationsResult]) => {
+    Promise.all([getTripById(id), getDestinations(id), getChecklistItems(id)])
+      .then(([tripResult, destinationsResult, checklistResult]) => {
         setTrip(tripResult);
         setDestinations(destinationsResult);
+        setChecklistItems(checklistResult);
       })
       .catch((err) => setError(getErrorMessage(err, "Plan putovanja nije pronađen.")))
       .finally(() => setIsLoading(false));
   }, [id]);
+
+  async function handleAddChecklistItem(text: string) {
+    if (!id) {
+      return;
+    }
+
+    try {
+      const created = await createChecklistItem(id, { text, isCompleted: false });
+      setChecklistItems((prev) => [...prev, created]);
+    } catch (err) {
+      setError(getErrorMessage(err, "Greška prilikom dodavanja stavke."));
+    }
+  }
+
+  async function handleToggleChecklistItem(item: ChecklistItem) {
+    if (!id) {
+      return;
+    }
+
+    try {
+      const updated = await updateChecklistItem(id, item.id, {
+        text: item.text,
+        isCompleted: !item.isCompleted,
+      });
+      setChecklistItems((prev) => prev.map((i) => (i.id === updated.id ? updated : i)));
+    } catch (err) {
+      setError(getErrorMessage(err, "Greška prilikom izmene stavke."));
+    }
+  }
+
+  async function handleDeleteChecklistItem(itemId: string) {
+    if (!id) {
+      return;
+    }
+
+    try {
+      await deleteChecklistItem(id, itemId);
+      setChecklistItems((prev) => prev.filter((i) => i.id !== itemId));
+    } catch (err) {
+      setError(getErrorMessage(err, "Greška prilikom brisanja stavke."));
+    }
+  }
 
   async function handleDeleteTrip() {
     if (!id || !confirm("Da li sigurno želiš da obrišeš ovaj plan putovanja?")) {
@@ -136,6 +188,13 @@ export function TripDetailPage() {
           ))}
         </div>
       )}
+
+      <ChecklistSection
+        items={checklistItems}
+        onAdd={handleAddChecklistItem}
+        onToggle={handleToggleChecklistItem}
+        onDelete={handleDeleteChecklistItem}
+      />
     </div>
   );
 }

@@ -49,6 +49,7 @@ namespace TripService
             services.AddScoped<ITripPlanService, TripPlanService>();
             services.AddScoped<IDestinationService, DestinationService>();
             services.AddScoped<IActivityService, ActivityService>();
+            services.AddScoped<IChecklistService, ChecklistService>();
 
             var jwtSection = Configuration.GetSection("Jwt");
 
