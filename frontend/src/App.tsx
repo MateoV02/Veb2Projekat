@@ -11,6 +11,8 @@ import { TripDetailPage } from "./pages/TripDetailPage";
 import { DestinationFormPage } from "./pages/DestinationFormPage";
 import { ActivitiesPage } from "./pages/ActivitiesPage";
 import { ActivityFormPage } from "./pages/ActivityFormPage";
+import { ExpensesPage } from "./pages/ExpensesPage";
+import { ExpenseFormPage } from "./pages/ExpenseFormPage";
 
 function App() {
   return (
@@ -37,6 +39,9 @@ function App() {
             <Route path="/trips/:id/activities" element={<ActivitiesPage />} />
             <Route path="/trips/:tripId/activities/new" element={<ActivityFormPage />} />
             <Route path="/trips/:tripId/activities/:activityId/edit" element={<ActivityFormPage />} />
+            <Route path="/trips/:id/expenses" element={<ExpensesPage />} />
+            <Route path="/trips/:tripId/expenses/new" element={<ExpenseFormPage />} />
+            <Route path="/trips/:tripId/expenses/:expenseId/edit" element={<ExpenseFormPage />} />
           </Route>
         </Routes>
       </AuthProvider>

@@ -80,6 +80,9 @@ export function TripDetailPage() {
           <Link to={`/trips/${trip.id}/activities`}>
             <button>Aktivnosti / kalendar</button>
           </Link>
+          <Link to={`/trips/${trip.id}/expenses`}>
+            <button>Troškovi / budžet</button>
+          </Link>
           <Link to={`/trips/${trip.id}/edit`}>
             <button>Izmeni</button>
           </Link>
