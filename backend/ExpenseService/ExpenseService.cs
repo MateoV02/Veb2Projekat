@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Fabric;
 using System.IO;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.ServiceFabric.Services.Communication.AspNetCore;
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
@@ -25,6 +26,10 @@ namespace ExpenseService
                     {
                         return new WebHostBuilder()
                             .UseKestrel()
+                            .ConfigureAppConfiguration((_, config) =>
+                            {
+                                config.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+                            })
                             .ConfigureServices(services => services.AddSingleton(serviceContext))
                             .UseContentRoot(Directory.GetCurrentDirectory())
                             .UseStartup<Startup>()
