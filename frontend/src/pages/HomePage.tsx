@@ -18,6 +18,7 @@ const SERVICE_LABELS: Record<ServiceKey, string> = {
 
 export function HomePage() {
   const { user } = useAuth();
+  const isAdmin = user?.role === "Admin";
   const [status, setStatus] = useState<Record<ServiceKey, boolean | null>>({
     identity: null,
     trip: null,
@@ -27,6 +28,10 @@ export function HomePage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!isAdmin) {
+      return;
+    }
+
     const checks: Array<[ServiceKey, () => Promise<unknown>]> = [
       ["identity", checkIdentityHealth],
       ["trip", checkTripHealth],
@@ -48,7 +53,7 @@ export function HomePage() {
       setStatus(next);
       setLoading(false);
     });
-  }, []);
+  }, [isAdmin]);
 
   return (
     <div className="page">
@@ -62,22 +67,24 @@ export function HomePage() {
         </Link>
       </div>
 
-      <div className="section">
-        <div className="section-header">
-          <h2>Status backend servisa</h2>
-          <span className="muted-count">Service Fabric klaster</span>
+      {isAdmin && (
+        <div className="section">
+          <div className="section-header">
+            <h2>Status backend servisa</h2>
+            <span className="muted-count">Service Fabric klaster</span>
+          </div>
+          <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
+            {(Object.keys(SERVICE_LABELS) as ServiceKey[]).map((key) => (
+              <ServiceStatusCard
+                key={key}
+                name={SERVICE_LABELS[key]}
+                loading={loading}
+                online={status[key]}
+              />
+            ))}
+          </div>
         </div>
-        <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
-          {(Object.keys(SERVICE_LABELS) as ServiceKey[]).map((key) => (
-            <ServiceStatusCard
-              key={key}
-              name={SERVICE_LABELS[key]}
-              loading={loading}
-              online={status[key]}
-            />
-          ))}
-        </div>
-      </div>
+      )}
     </div>
   );
 }
