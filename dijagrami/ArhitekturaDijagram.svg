@@ -1,0 +1,87 @@
+<svg width="1500" height="800" viewBox="0 0 1500 800" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="9" refY="5" orient="auto-start-reverse">
+      <path d="M0,0 L9,5 L0,10" fill="none" stroke="black" stroke-width="2"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="1500" height="800" fill="white"/>
+
+  <text x="750" y="28" text-anchor="middle" font-size="22" font-weight="bold">Arhitektura sistema</text>
+
+  <!-- Frontend -->
+  <rect x="550" y="45" width="400" height="60" fill="white" stroke="black" stroke-width="3"/>
+  <text x="750" y="82" text-anchor="middle" font-size="19" font-weight="bold">React Frontend</text>
+
+  <!-- Labela na strelicama ka servisima -->
+  <text x="750" y="140" text-anchor="middle" font-size="15" font-weight="bold">REST / JWT</text>
+  <text x="750" y="160" text-anchor="middle" font-size="15" font-weight="bold">Microsoft Service Fabric klaster</text>
+
+  <!-- Strelice Frontend -> servisi -->
+  <line x1="240" y1="105" x2="240" y2="215" stroke="black" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <line x1="580" y1="105" x2="580" y2="215" stroke="black" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <line x1="920" y1="105" x2="920" y2="215" stroke="black" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <line x1="1260" y1="105" x2="1260" y2="215" stroke="black" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+  <!-- IdentityService -->
+  <rect x="90" y="220" width="300" height="150" fill="white" stroke="black" stroke-width="3"/>
+  <text x="240" y="252" text-anchor="middle" font-size="17" font-weight="bold">IdentityService</text>
+  <text x="240" y="278" text-anchor="middle" font-size="14">stateless &#183; port 8081</text>
+  <text x="240" y="300" text-anchor="middle" font-size="14">registracija, login, JWT</text>
+  <text x="240" y="320" text-anchor="middle" font-size="14">bcrypt, uloge User/Admin</text>
+  <text x="240" y="352" text-anchor="middle" font-size="13" font-style="italic">baza: IdentityDb</text>
+
+  <!-- TripService -->
+  <rect x="430" y="220" width="300" height="150" fill="white" stroke="black" stroke-width="3"/>
+  <text x="580" y="252" text-anchor="middle" font-size="17" font-weight="bold">TripService</text>
+  <text x="580" y="278" text-anchor="middle" font-size="14">stateless &#183; port 8082</text>
+  <text x="580" y="300" text-anchor="middle" font-size="14">planovi, destinacije,</text>
+  <text x="580" y="320" text-anchor="middle" font-size="14">aktivnosti, checklist</text>
+  <text x="580" y="352" text-anchor="middle" font-size="13" font-style="italic">baza: TripDb</text>
+
+  <!-- ExpenseService -->
+  <rect x="770" y="220" width="300" height="150" fill="white" stroke="black" stroke-width="3"/>
+  <text x="920" y="252" text-anchor="middle" font-size="17" font-weight="bold">ExpenseService</text>
+  <text x="920" y="278" text-anchor="middle" font-size="14">stateless &#183; port 8083</text>
+  <text x="920" y="300" text-anchor="middle" font-size="14">troškovi, kategorije,</text>
+  <text x="920" y="320" text-anchor="middle" font-size="14">obračun budžeta</text>
+  <text x="920" y="352" text-anchor="middle" font-size="13" font-style="italic">baza: ExpenseDb</text>
+
+  <!-- SharingService -->
+  <rect x="1110" y="220" width="300" height="150" fill="#fdf3e0" stroke="black" stroke-width="3"/>
+  <text x="1260" y="252" text-anchor="middle" font-size="17" font-weight="bold">SharingService</text>
+  <text x="1260" y="278" text-anchor="middle" font-size="14">stateful &#183; port 8084</text>
+  <text x="1260" y="300" text-anchor="middle" font-size="14">QR kod, share tokeni</text>
+  <text x="1260" y="320" text-anchor="middle" font-size="14">(VIEW / EDIT pristup)</text>
+  <text x="1260" y="352" text-anchor="middle" font-size="13" font-style="italic">Reliable Dictionary</text>
+
+  <!-- Strelice servisi -> baze -->
+  <line x1="240" y1="370" x2="240" y2="460" stroke="black" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <line x1="580" y1="370" x2="580" y2="460" stroke="black" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <line x1="920" y1="370" x2="920" y2="460" stroke="black" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <line x1="1260" y1="370" x2="1260" y2="460" stroke="black" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+  <!-- Microsoft SQL Server (LocalDB) - odvojene baze po servisu -->
+  <rect x="90" y="465" width="980" height="110" fill="white" stroke="black" stroke-width="3"/>
+  <text x="580" y="490" text-anchor="middle" font-size="17" font-weight="bold">Microsoft SQL Server (LocalDB instanca)</text>
+  <line x1="416.67" y1="505" x2="416.67" y2="565" stroke="black" stroke-width="1.5"/>
+  <line x1="743.33" y1="505" x2="743.33" y2="565" stroke="black" stroke-width="1.5"/>
+  <text x="253" y="540" text-anchor="middle" font-size="14">IdentityDb</text>
+  <text x="580" y="540" text-anchor="middle" font-size="14">TripDb</text>
+  <text x="906" y="540" text-anchor="middle" font-size="14">ExpenseDb</text>
+  <text x="580" y="560" text-anchor="middle" font-size="12" font-style="italic">(odvojena baza po servisu &#8212; database-per-service)</text>
+
+  <!-- Reliable Dictionary box -->
+  <rect x="1110" y="465" width="300" height="110" fill="#fdf3e0" stroke="black" stroke-width="3"/>
+  <text x="1260" y="495" text-anchor="middle" font-size="16" font-weight="bold">Service Fabric</text>
+  <text x="1260" y="518" text-anchor="middle" font-size="16" font-weight="bold">Reliable Dictionary</text>
+  <text x="1260" y="545" text-anchor="middle" font-size="13" font-style="italic">replicirano u memoriji,</text>
+  <text x="1260" y="562" text-anchor="middle" font-size="13" font-style="italic">bez SQL baze</text>
+
+  <!-- Napomena o medjuservisnoj komunikaciji -->
+  <rect x="90" y="620" width="1320" height="120" fill="white" stroke="black" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <text x="750" y="648" text-anchor="middle" font-size="15" font-weight="bold">Međuservisna komunikacija (sinhroni REST pozivi, JWT se prosleđuje dalje)</text>
+  <text x="750" y="676" text-anchor="middle" font-size="14">ExpenseService &#8594; TripService &#160;&#160;(provera planiranog budžeta i vlasništva plana)</text>
+  <text x="750" y="700" text-anchor="middle" font-size="14">SharingService &#8594; TripService &#160;&#160;(provera vlasništva plana pri kreiranju share linka)</text>
+  <text x="750" y="724" text-anchor="middle" font-size="14">TripService &#8594; SharingService &#160;&#160;(validacija share tokena pri anonimnom pristupu)</text>
+</svg>

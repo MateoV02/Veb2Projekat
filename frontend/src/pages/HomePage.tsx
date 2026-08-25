@@ -60,7 +60,6 @@ export function HomePage() {
       <div className="page-header">
         <div>
           <h1>Dobrodošao/la, {user?.name} 👋</h1>
-          <p style={{ margin: 0 }}>Evo pregleda tvog naloga i statusa sistema.</p>
         </div>
         <Link to="/trips" className="btn btn-primary">
           Moji planovi putovanja →

@@ -66,6 +66,9 @@ export function TripsListPage() {
         />
       ) : (
         <div className="fade-in">
+          <p style={{ fontSize: 13.5, color: "var(--color-text-muted)", marginTop: -8, marginBottom: 16 }}>
+            Klikni na naziv putovanja da otvoriš detalje, izmeniš plan ili pristupiš dodatnim opcijama (aktivnosti, troškovi, deljenje).
+          </p>
           {trips.map((trip) => (
             <TripCard key={trip.id} trip={trip} onDelete={handleDelete} />
           ))}
